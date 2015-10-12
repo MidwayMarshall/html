@@ -3,25 +3,30 @@ package com.mygdx.game.battlewindow;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.*;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.TaskService2;
+
+import java.util.Random;
 
 public class ContinuousGameFrame extends ApplicationAdapter implements InputProcessor {
     private static final String TAG = "ContinuousGameFrame";
     public TaskService service;
 
+    /* I'm curious if these can be shared between frames*/
+    private static BitmapFont font;
+    private static TextureAtlas battleAtlas;
+
     public SpriteBatch batch;
-    private BitmapFont font;
-    private TextureAtlas battleAtlas;
     private Image background;
     public SpriteAnimation[] sprites = new SpriteAnimation[2];
     public TextureAtlas[] spriteAtlas = new TextureAtlas[2];
@@ -46,46 +51,27 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
     public ContinuousGameFrame(Bridge bridge) {
         this.bridge = bridge;
-
     }
-
-    long beginTime;
 
     @Override
     public void create() {
+        objectDebugger = new ShapeRenderer();
         if (bridge != null) {
             bridge.setGame(this);
 
-            /*
-            callBack.callForward(this);
-            activity = callBack.hook();
-            */
             service = new TaskService2();
+            call();
 
-            try {
-                call();
-                //activity.callForward(this, service);
-
-                calculateGUI();
-
-                setBackground(0);
-
-                HUDs[me] = new BattleInfoHUD(battleAtlas, true, scaledX, font);
-                HUDs[opp] = new BattleInfoHUD(battleAtlas, false, scaledX, font);
-
-                Gdx.input.setInputProcessor(this);
-
-            } catch (NullPointerException e) {
-                e.printStackTrace();
-                this.dispose();
-            }
-        } else {
             calculateGUI();
-            setBackground(0);
+
+            //setBackground(backgroundId);
+
             HUDs[me] = new BattleInfoHUD(battleAtlas, true, scaledX, font);
             HUDs[opp] = new BattleInfoHUD(battleAtlas, false, scaledX, font);
-            updateSprite(true, "3", false);
-            updateSprite(false, "5", false);
+
+            Gdx.input.setInputProcessor(this);
+            bridge.finished();
+            STATUS_CURRENT = STATUS_RUNNING;
         }
     }
 
@@ -93,8 +79,8 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         // Handle in overridden extension
     }
 
-    private final static int FRAME_TARGET = 1000 / 32;
-    private int sleepTime;
+    //private final static int FRAME_TARGET = 1000 / 32;
+    //private int sleepTime;
 
     Event event;
 
@@ -103,7 +89,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         delta = Gdx.graphics.getDeltaTime();
         elapsedTime += delta;
 
-        beginTime = System.currentTimeMillis();
+        //beginTime = System.currentTimeMillis();
 
         switch (STATUS_CURRENT) {
             case STATUS_INIT: {
@@ -131,6 +117,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                 batch.begin();
                 draw();
                 batch.end();
+                //renderDebugObjects();
                 break;
             }
             case STATUS_PAUSED: {
@@ -139,6 +126,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         }
 
 
+        /*
         long timeDiff = System.currentTimeMillis() - beginTime;
         sleepTime = (int) (FRAME_TARGET - timeDiff);
         if (sleepTime > 0 && Gdx.graphics.getFramesPerSecond() > 25) {
@@ -148,6 +136,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
             }
         }
+        */
     }
 
     private void calculateGUI() {
@@ -158,17 +147,33 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         scaledX = width / 400f;
         scaledY = height / 240;
 
-        Rectangle.tmp.set(5 * scaledX, 5 * scaledY, scaledX * 155, scaledY * 175);
-        Rectangle.tmp2.set(width - (scaledX * 135) - 5 * scaledX, height - (scaledY * 135) - 5 * scaledY, scaledX * 135, scaledY * 130);
+        float xMe = 10 * scaledX;
+        float yMe = 10 * scaledY;
+        float widthMe = scaledX * 155;
+        float heightMe = scaledY * 150;
+        Rectangle.tmp.set(xMe, yMe, widthMe, heightMe);
 
-        battleAtlas = new TextureAtlas(Gdx.files.internal("battle3.txt"));
+        float xOpp = width - (scaledX * 135) - 10 * scaledX;
+        float yOpp = height - (scaledY * 135) - 10 * scaledY;
+        float widthOpp = scaledX * 135;
+        float heightOpp = scaledY * 130;
+        Rectangle.tmp2.set(xOpp, yOpp, widthOpp, heightOpp);
 
-        font = new BitmapFont(Gdx.files.internal("battle.fnt"), battleAtlas.findRegion("font"));
-        font.getData().setScale(scaledX * 1.5f);
+        if (battleAtlas == null) {
+            //battleAtlas = new TextureAtlas(Gdx.files.internal("battle3.txt"));
+            battleAtlas = bridge.getAtlas("battle3.txt");
+        }
+
+        if (font == null) {
+            font = new BitmapFont(Gdx.files.internal("battle.fnt"), battleAtlas.findRegion("font"));
+            font.getData().setScale(scaledX * 1.4f);
+        }
     }
 
     private void draw() {
-        background.draw(batch, 1f);
+        if (background != null) {
+            background.draw(batch, 1f);
+        }
 
         drawPokemon(me);
         drawPokemon(opp);
@@ -176,7 +181,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         HUDs[me].draw(batch);
         HUDs[opp].draw(batch);
 
-        font.draw(batch, "" + Gdx.graphics.getFramesPerSecond(), 100, 100);
+        //font.draw(batch, "" + Gdx.graphics.getFramesPerSecond(), 10, 10);
     }
 
     private void act() {
@@ -187,23 +192,33 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     @Override
     public void resume() {
         super.resume();
+        if (sprites[me] != null && sprites[opp] != null) {
+            if (sprites[me].getKeyFrames().length > 0 && sprites[opp].getKeyFrames().length > 0) {
+                STATUS_CURRENT = STATUS_RUNNING;
+                return;
+            }
+        }
+        STATUS_CURRENT = STATUS_INIT;
     }
 
     @Override
     public void pause() {
         super.pause();
+        STATUS_CURRENT = STATUS_PAUSED;
     }
 
     @Override
     public void dispose() {
         super.dispose();
         try {
+            /*
             battleAtlas.dispose();
             font.dispose();
             batch.dispose();
             spriteAtlas[me].dispose();
             spriteAtlas[opp].dispose();
             ((TextureRegionDrawable) background.getDrawable()).getRegion().getTexture().dispose();
+            */
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -214,10 +229,13 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     }
 
     public void updateSprite(boolean side, String path, boolean female) {
+        //bridge.alert("Updating: " + path);
         if (!path.equals("0")) {
             if (side) {
-                if (female && checkForFemaleAsset(true, path)) path = path + "f";
+                //if (female && checkForFemaleAsset(true, path)) path = path + "f";
                 //spriteAtlas[me] = GdxGZipAssetLoader.loadTextureAtlas(path, true);
+                spriteAtlas[me] = new TextureAtlas(Gdx.files.internal(path + ".atlas"));
+                //spriteAtlas[me] = bridge.getAtlas(path);
                 Array<TextureRegion> regions = new Array<TextureRegion>();
                 if (spriteAtlas[me].findRegion("001") == null) {
                     for (int i = 1; i < spriteAtlas[me].getRegions().size; i++) {
@@ -228,11 +246,13 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                         regions.add(spriteAtlas[me].findRegion(StringFormat(i)));
                     }
                 }
-                sprites[me] = new SpriteAnimation(0.1f, regions, Animation.PlayMode.LOOP);
+                sprites[me] = new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP);
                 sprites[me].fitInRectangle(Rectangle.tmp, true);
             } else {
-                if (female && checkForFemaleAsset(false, path)) path = path + "f";
+                //if (female && checkForFemaleAsset(false, path)) path = path + "f";
                 //spriteAtlas[opp] = GdxGZipAssetLoader.loadTextureAtlas(path, false);
+                spriteAtlas[opp] = new TextureAtlas(Gdx.files.internal(path + ".atlas"));
+                //spriteAtlas[me] = bridge.getAtlas(path);
                 Array<TextureRegion> regions = new Array<TextureRegion>();
                 if (spriteAtlas[opp].findRegion("001") == null) {
                     for (int i = 1; i < spriteAtlas[opp].getRegions().size; i++) {
@@ -243,7 +263,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                         regions.add(spriteAtlas[opp].findRegion(StringFormat(i)));
                     }
                 }
-                sprites[opp] = new SpriteAnimation(0.1f, regions, Animation.PlayMode.LOOP);
+                sprites[opp] = new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP);
                 sprites[opp].fitInRectangle(Rectangle.tmp2, false);
             }
             if (STATUS_CURRENT == STATUS_INIT) {
@@ -257,11 +277,14 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     }
 
     public void drawPokemon(byte player) {
-        sprites[player].draw(elapsedTime, batch);
+        if (sprites[player] != null) {
+            sprites[player].draw(elapsedTime, batch);
+        }
     }
 
     public void setBackground(int id) {
-        background = new Image(new Texture(Gdx.files.internal("bakcground.png")));
+        background = new Image(bridge.getTexture("background/" + id + ".png"));
+        //background = new Image(bridge.getTexture("background/" + id + ".png"));
         background.setWidth(width);
         background.setHeight(height);
     }
@@ -289,16 +312,14 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
         // Handle in overridden extension
-        /*
-        Log.e(TAG, "Rect 1:" + Rectangle.tmp.contains(screenX, screenY));
-        if (Rectangle.tmp.contains(screenX, screenY)) {
-            activity.DialogLooper(BattleActivity.BattleDialog.MyDynamicInfo.ordinal());
+        if (Rectangle.tmp.contains(screenX, height - screenY)) {
+            bridge.alert("true");
+            //activity.DialogLooper(BattleActivity.BattleDialog.MyDynamicInfo.ordinal());
         }
-        Log.e(TAG, "Rect 2:" + Rectangle.tmp2.contains(screenX, screenY));
-        if (Rectangle.tmp2.contains(screenX, screenY)) {
-            activity.DialogLooper(BattleActivity.BattleDialog.OppDynamicInfo.ordinal());
+        if (Rectangle.tmp2.contains(screenX, height - screenY)) {
+            bridge.alert("false");
+            //activity.DialogLooper(BattleActivity.BattleDialog.OppDynamicInfo.ordinal());
         }
-        */
         return false;
     }
 
@@ -325,4 +346,18 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         }
         return string;
     }
+
+    public void drawRect(Rectangle rect) {
+        objectDebugger.rect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    }
+
+    ShapeRenderer objectDebugger;
+    public void renderDebugObjects() {
+        objectDebugger.begin(ShapeRenderer.ShapeType.Line);
+        objectDebugger.setColor(0, 1, 0, 1);
+        drawRect(Rectangle.tmp);
+        drawRect(Rectangle.tmp2);
+        objectDebugger.end();
+    }
+
 }

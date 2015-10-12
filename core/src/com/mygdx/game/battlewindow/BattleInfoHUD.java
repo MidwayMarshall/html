@@ -6,7 +6,8 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.mygdx.game.BattlePoke;
-import com.mygdx.game.ShallowBattlePoke;
+import com.mygdx.game.Bridge;
+import com.mygdx.game.JSONPoke;
 
 public class BattleInfoHUD {
 
@@ -68,6 +69,8 @@ public class BattleInfoHUD {
     private String realHealthString = "";
     private String totalHealthString = "";
 
+    private static int confirmationInt = 0;
+
     public BattleInfoHUD(TextureAtlas atlas, boolean me, float scale, BitmapFont font) {
         this.me = me;
         this.atlas = atlas;
@@ -78,13 +81,15 @@ public class BattleInfoHUD {
         updateHealthBar();
     }
 
-    public void updatePoke(ShallowBattlePoke poke) {
-        updateName(poke.rnick, poke.gender);
-        level = poke.level;
+    public void updatePoke(JSONPoke poke) {
+        //updateName(poke.rnick, poke.gender);
+        updateName(poke.name(), poke.gender());
+        level = poke.level();
         updateStatus(poke.status());
         //Log.e("HUD", poke.toString() + " HP to " + poke.lifePercent);
-        setHPNonAnimated(poke.lifePercent);
+        setHPNonAnimated(poke.percent());
         lastHealth = lifePercent;
+        confirmationInt = confirmationInt + 1;
     }
 
     public void updatePokeNonSpectating(BattlePoke poke) {
@@ -145,6 +150,13 @@ public class BattleInfoHUD {
         healthAction.newAction(newPercent, duration);
     }
 
+    public void setChangeHP(byte change, float duration) {
+        int newpercent = lifePercent - change;
+        if (newpercent > 100)   newpercent = 100; else
+        if (newpercent < 0)     newpercent = 0;
+        healthAction.newAction((byte) (newpercent), duration);
+    }
+
     public void setHP(byte newPercent, short newHP) {
         healthAction.newAction(newPercent, newHP, 4.5f);
     }
@@ -176,23 +188,27 @@ public class BattleInfoHUD {
     }
 
     private void setup() {
-        // 400/240
+        // 400/240 1.5/1.5
         // Me 120x21
         // Opp 124/16
         bar = atlas.findRegion("green_bar");
         battleStatus = atlas.findRegion("battle_status6");
         holdItem = atlas.findRegion("hold_item");
+        float mainWidth = scale * 400;
+        float mainHeight = scale * 240;
         updateHealthBar();
         if (me) {
             mainHUD = atlas.findRegion("me_HUD");
             mainHUD.getTexture().setFilter(Texture.TextureFilter.Nearest, Texture.TextureFilter.Nearest);
             widthHUD = Math.round(mainHUD.getRegionWidth() * scale * 1.7f);
             heightHUD = Math.round(mainHUD.getRegionHeight() * scale * 1.7f);
-            xHUD = Math.round((400 * scale) - widthHUD - 4 * scale);
-            yHUD = Math.round(4 * scale);
+
+            xHUD = Math.round(mainWidth - widthHUD - 10 * scale);
+            yHUD = Math.round(10 * scale);
 
             //widthBar = Math.round(48*scale*1.7f);
             heightBar = Math.round(2 * scale * 1.7f);
+
             xBar = Math.round(xHUD + (56 * scale * 1.7f));
             yBar = Math.round(yHUD + (10 * scale * 1.7f));
 
@@ -216,8 +232,9 @@ public class BattleInfoHUD {
             mainHUD = atlas.findRegion("opp_HUD");
             widthHUD = Math.round(mainHUD.getRegionWidth() * scale * 1.5f);
             heightHUD = Math.round(mainHUD.getRegionHeight() * scale * 1.5f);
-            xHUD = Math.round(4 * scale);
-            yHUD = Math.round(165 * scale - heightHUD);
+
+            xHUD = Math.round(10 * scale);
+            yHUD = Math.round(mainHeight - heightHUD - 10*scale);
 
             //widthBar = Math.round(48*scale*1.5f);
             heightBar = Math.round(2 * scale * 1.5f);
@@ -239,7 +256,7 @@ public class BattleInfoHUD {
     }
 
     public void draw(float delta, Batch batch) {
-        act(delta);
+        //act(delta);
         batch.draw(mainHUD, xHUD, yHUD, widthHUD, heightHUD);
         batch.draw(bar, xBar, yBar, widthBar, heightBar);
         if (statusBool) batch.draw(battleStatus, xStatus, yStatus, widthStatus, heightStatus);
@@ -247,9 +264,9 @@ public class BattleInfoHUD {
         if (displayRealHealth) {
             font.draw(batch, realHealthString, xCurrentHealth, yCurrentHealth);
             font.draw(batch, totalHealthString, xTotalHealth, yTotalHealth);
-            font.draw(batch, level + "", xLevel, yLevel);
+            font.draw(batch, level + " " + confirmationInt, xLevel, yLevel);
         } else {
-            font.draw(batch, level + "", xLevel, yLevel);
+            font.draw(batch, level + " " + confirmationInt, xLevel, yLevel);
         }
         font.draw(batch, name, xName, yName);
     }

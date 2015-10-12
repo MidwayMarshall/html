@@ -2,7 +2,7 @@ package com.mygdx.game.battlewindow;
 
 
 import com.mygdx.game.BattlePoke;
-import com.mygdx.game.ShallowBattlePoke;
+import com.mygdx.game.JSONPoke;
 
 public class Events {
     private Events() {
@@ -96,11 +96,11 @@ public class Events {
     }
 
     public static class HUDChange implements Event {
-        ShallowBattlePoke poke;
+        JSONPoke poke;
         boolean side;
 
 
-        public HUDChange(ShallowBattlePoke poke, boolean side) {
+        public HUDChange(JSONPoke poke, boolean side) {
             this.poke = poke;
             this.side = side;
         }
@@ -108,28 +108,32 @@ public class Events {
         @Override
         public void run(ContinuousGameFrame Frame) {
             Frame.HUDs[(side ? 0 : 1)].updatePoke(poke);
-            if (poke.status() == 31) {
-                Frame.sprites[(side ? 0 : 1)].paused = true;
-            }
+            //if (poke.status() == 31) {
+            //    Frame.sprites[(side ? 0 : 1)].paused = true;
+            //}
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
     }
 
     public static class SpriteChange implements Event {
+        JSONPoke poke;
         boolean side;
         String path;
-        boolean female;
 
-        public SpriteChange(boolean side, String path, boolean female) {
+        public SpriteChange(JSONPoke poke, boolean side) {
+            this.poke = poke;
             this.side = side;
-            this.path = path;
-            this.female = female;
+            this.path = (side ? "back/" : "front/") + Short.toString(poke.num());
         }
 
         @Override
         public void run(ContinuousGameFrame Frame) {
 //            Log.e("Event", "SpriteChange " + log + " to " + Thread.currentThread().getName() + " took: " + time);
-            Frame.updateSprite(side, path, female);
+            Frame.updateSprite(side, path, false);
+        }
+
+        public String getPath() {
+            return path;
         }
     }
 
@@ -145,9 +149,9 @@ public class Events {
         @Override
         public void run(ContinuousGameFrame Frame) {
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
-            Frame.HUDs[(side ? 1 : 0)].updateStatus(status);
+            Frame.HUDs[(side ? 0 : 1)].updateStatus(status);
             if (status == 31) {
-                Frame.sprites[(side ? 1 : 0)].paused = true;
+                Frame.sprites[(side ? 0 : 1)].paused = true;
             }
         }
     }
@@ -163,22 +167,60 @@ public class Events {
         public void run(ContinuousGameFrame Frame) {
             Frame.setBackground(id);
         }
+
+        public int getId() {
+            return id;
+        }
     }
 
-    /*
-    public static class StatChange implements Event {
-        byte player;
-        byte type;
+    public static class SendOut implements Event {
+        JSONPoke poke;
+        boolean side;
+        String path;
 
-        public StatChange(byte player, byte type) {
-            this.player = player;
-            this.type = type;
+        public SendOut(JSONPoke poke, boolean side) {
+            this.poke = poke;
+            this.side = side;
+            this.path = (side ? "back/" : "front/") + Short.toString(poke.num());
         }
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.addStatEffect(player, type);
+//            Log.e("Event", "SpriteChange " + log + " to " + Thread.currentThread().getName() + " took: " + time);
+            Frame.updateSprite(side, path, false);
+        }
+
+        public String getPath() {
+            return path;
+        }
+    }
+
+    /*
+    public static class SendBack implements Event {
+        byte player;
+
+        public SendBack(byte player) {
+            this.player = player;
+        }
+
+        @Override
+        public void run(ContinuousGameFrame Frame) {
+            Frame.sprites[player].visible = false;
         }
     }
     */
-}
+
+    public static class KO implements Event {
+        boolean side;
+
+        public KO(boolean side) {
+            this.side = side;
+        }
+
+        @Override
+        public void run(ContinuousGameFrame Frame) {
+            Frame.sprites[(side ? 0 : 1)].paused = true;
+            Frame.HUDs[(side ? 0 : 1)].updateStatus(31); // 31 = Koed
+        }
+    }
+ }
