@@ -180,6 +180,9 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     private void act() {
         HUDs[me].act(delta);
         HUDs[opp].act(delta);
+
+        actPokemon(me);
+        actPokemon(opp);
     }
 
     @Override
@@ -269,9 +272,15 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         }
     }
 
-    public void drawPokemon(byte player) {
+    private void drawPokemon(byte player) {
         if (sprites[player] != null) {
             sprites[player].draw(elapsedTime, batch);
+        }
+    }
+
+    private void actPokemon(byte player) {
+        if (sprites[player] != null) {
+            sprites[player].act(delta);
         }
     }
 

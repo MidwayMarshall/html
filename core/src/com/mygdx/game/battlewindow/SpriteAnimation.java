@@ -9,16 +9,21 @@ import com.badlogic.gdx.utils.Array;
 
 public class SpriteAnimation extends Animation {
 
+
+
     public SpriteAnimation(float frameDuration, Array<? extends TextureRegion> keyFrames) {
         super(frameDuration, keyFrames);
+        fader = new Fader();
     }
 
     public SpriteAnimation(float frameDuration, Array<? extends TextureRegion> keyFrames, PlayMode playMode) {
         super(frameDuration, keyFrames, playMode);
+        fader = new Fader();
     }
 
     public SpriteAnimation(float frameDuration, TextureRegion... keyFrames) {
         super(frameDuration, keyFrames);
+        fader = new Fader();
     }
 
     private float scale = 1f;
@@ -37,17 +42,31 @@ public class SpriteAnimation extends Animation {
     public boolean paused = false;
     public boolean visible = true;
 
-    TextureRegion region;
+    private TextureRegion region;
+    private Fader fader;
+    private float alpha = 1f;
 
     public void draw(float time, Batch batch) {
         if (visible) {
-            if (!paused) {
-                region = getKeyFrame(time);
+            if (alpha != 0f) {
+                if (!paused) {
+                    region = getKeyFrame(time);
+                }
+                if (alpha == 1f) {
+                    draw(batch);
+                } else {
+                    batch.setColor(1f, 1f, 1f, alpha);
+                    draw(batch);
+                    batch.setColor(1f, 1f, 1f, 1f);
+                }
             }
-            offX = ((TextureAtlas.AtlasRegion) region).offsetX * scale;
-            offY = ((TextureAtlas.AtlasRegion) region).offsetY * scale;
-            batch.draw(region, x + offX, y + offY, region.getRegionWidth() * scale, region.getRegionHeight() * scale);
         }
+    }
+
+    private void draw(Batch batch) {
+        offX = ((TextureAtlas.AtlasRegion) region).offsetX * scale;
+        offY = ((TextureAtlas.AtlasRegion) region).offsetY * scale;
+        batch.draw(region, x + offX, y + offY, region.getRegionWidth() * scale, region.getRegionHeight() * scale);
     }
 
     // 400/240
@@ -92,5 +111,40 @@ public class SpriteAnimation extends Animation {
 
         difference = rect.height - height;
         y = rect.y + (difference / 2f) - maxOffY / 2f;
+    }
+
+    public void act(float delta) {
+        fader.update(delta);
+    }
+
+    public void startFade() {
+        fader = new Fader(1.5f);
+    }
+
+    private class Fader {
+        private float duration;
+        private float remaining;
+        private boolean running = false;
+
+        private Fader() {}
+
+        private Fader(float duration) {
+            this.duration = duration;
+            remaining = duration;
+            running = true;
+        }
+
+        private void update(float delta) {
+            if (running) {
+                if (delta > remaining) {
+                    running = false;
+                    alpha = 0f;
+                    remaining = 0f;
+                } else {
+                    remaining -= delta;
+                    alpha = remaining / duration;
+                }
+            }
+        }
     }
 }

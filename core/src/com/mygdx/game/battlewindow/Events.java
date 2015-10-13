@@ -220,6 +220,7 @@ public class Events {
         @Override
         public void run(ContinuousGameFrame Frame) {
             Frame.sprites[(side ? 0 : 1)].paused = true;
+            Frame.sprites[(side ? 0 : 1)].startFade();
             Frame.HUDs[(side ? 0 : 1)].updateStatus(31); // 31 = Koed
         }
     }

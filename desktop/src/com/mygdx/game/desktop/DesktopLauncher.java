@@ -38,9 +38,7 @@ public class DesktopLauncher {
 
 		@Override
 		public void finished() {
-			Random random = new Random();
-			int randomNum = random.nextInt(37);
-			game.service.offer(new Events.BackgroundChange(randomNum));
+
 		}
 
 		@Override
@@ -61,7 +59,13 @@ public class DesktopLauncher {
 
 		@Override
 		public void alert(String message) {
-			log(message);
+			if (message == "true") {
+				game.service.offer(new Events.KO(true));
+			} else if (message == "false") {
+				game.service.offer(new Events.KO(false));
+			} else {
+				log(message);
+			}
 		}
 
 		@Override
