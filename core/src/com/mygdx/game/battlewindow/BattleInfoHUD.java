@@ -130,7 +130,7 @@ public class BattleInfoHUD {
     public void updateStatus(int status) {
         if (statusInt != status) {
             statusInt = status;
-            if (statusInt > 0 && statusInt < 6) {
+            if (statusInt > 0 && statusInt < 7) {
                 battleStatus = atlas.findRegion("battle_status" + statusInt);
                 statusBool = true;
             } else if (statusInt == 31) {
