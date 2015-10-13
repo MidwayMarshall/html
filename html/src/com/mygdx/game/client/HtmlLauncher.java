@@ -33,6 +33,7 @@ public class HtmlLauncher extends GwtApplication {
 
 
     public static class HtmlBridge implements Bridge {
+        byte me, opp;
         @Override
         public TextureAtlas getAtlas(String path) {
             return Assets.getAtlas(path);
@@ -110,6 +111,10 @@ public class HtmlLauncher extends GwtApplication {
             Timer t = new Timer() {
                 @Override
                 public void run() {
+                    me = (byte) getMe();
+                    opp = (byte) getOpp();
+                    Logger.println("Me " + me);
+                    Logger.println("Opp " + opp);
                     init();
                     unpausebattle();
                 }
@@ -120,10 +125,10 @@ public class HtmlLauncher extends GwtApplication {
 
         private void init() {
             // Window finished loading, let's send information
-            JavaScriptPokemon me = JavaScriptPokemon.fromJS(getPoke(1, 0));
-            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(0, 0));
-            Logger.println("My Pokemon " + getPoke(1, 0));
-            Logger.println("Opp Pokemon " + getPoke(0, 0));
+            JavaScriptPokemon me = JavaScriptPokemon.fromJS(getPoke(this.me, 0));
+            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(this.opp, 0));
+            Logger.println("My Pokemon " + getPoke(this.me, 0));
+            Logger.println("Opp Pokemon " + getPoke(this.opp, 0));
             game.HUDs[0].updatePoke(me);
             game.HUDs[1].updatePoke(opp);
             if (me.num() > 0) {
@@ -158,9 +163,9 @@ public class HtmlLauncher extends GwtApplication {
         */
 
         public void dealWithSendOut(int player) {
-            Logger.println("sendout");
+            //Logger.println("sendout");
             JavaScriptPokemon poke = JavaScriptPokemon.fromJS(getPoke(player, 0));
-            boolean side = player == 1;
+            boolean side = player == me;
             Event event = new Events.HUDChange(poke, side);
             addEvent(event);
             HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, side), this, 1);
@@ -168,7 +173,7 @@ public class HtmlLauncher extends GwtApplication {
         }
 
         public void dealWithSendBack(int player) {
-            Logger.println("sendback");
+            //Logger.println("sendback");
             pausebattle();
             //Event event = new Events.SendBack((byte) player);
             //addEvent(event);
@@ -183,24 +188,24 @@ public class HtmlLauncher extends GwtApplication {
 
         public void dealWithStatusChange(int player, int status) {
             Logger.println("statuschange");
-            Event event = new Events.StatusChange(player == 1, status);
+            Event event = new Events.StatusChange(player == me, status);
             addEvent(event);
         }
 
         public void dealWithHpChange(int player, int change) {
-            Logger.println("hpchange");
+            //Logger.println("hpchange");
             pausebattle();
             int duration = change;
             if (duration < 0) duration = -duration;
             if (duration > 100) duration = 100;
-            Event event = new HtmlEvents.AnimatedHPEvent((byte) change, player == 1, duration * 30, this);
+            Event event = new HtmlEvents.AnimatedHPEvent((byte) change, player == me, duration * 30, this);
             addEvent(event);
         }
 
         public void dealWithKo(int player) {
-            Logger.println("KO");
+            //Logger.println("KO");
             pausebattle();
-            Event event = new Events.KO(player == 1);
+            Event event = new Events.KO(player == me);
             addEvent(event);
             Timer t = new Timer() {
                 @Override
@@ -249,7 +254,15 @@ public class HtmlLauncher extends GwtApplication {
             return JSON.stringify(team);
         }-*/;
 
+        private static native int getMe() /*-{
+            var me = $wnd.battle.myself;
+            return me;
+        }-*/;
 
+        private static native int getOpp() /*-{
+            var opp = $wnd.battle.opponent;
+            return opp;
+        }-*/;
     }
 
 
