@@ -1,0 +1,13 @@
+
+172-spiky-eared.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+000
+  rotate: false
+  xy: 0, 0
+  size: 52, 60
+  orig: 52, 60
+  offset: 0, 0
+  index: -1

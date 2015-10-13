@@ -1,0 +1,167 @@
+
+333.png
+size: 1024,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+000
+  rotate: false
+  xy: 446, 10
+  size: 69, 37
+  orig: 74, 52
+  offset: 3, 15
+  index: -1
+001
+  rotate: false
+  xy: 446, 10
+  size: 69, 37
+  orig: 74, 52
+  offset: 3, 15
+  index: -1
+002
+  rotate: false
+  xy: 656, 11
+  size: 65, 36
+  orig: 74, 52
+  offset: 6, 14
+  index: -1
+003
+  rotate: false
+  xy: 656, 11
+  size: 65, 36
+  orig: 74, 52
+  offset: 6, 14
+  index: -1
+004
+  rotate: false
+  xy: 790, 9
+  size: 59, 38
+  orig: 74, 52
+  offset: 9, 12
+  index: -1
+005
+  rotate: false
+  xy: 790, 9
+  size: 59, 38
+  orig: 74, 52
+  offset: 9, 12
+  index: -1
+006
+  rotate: false
+  xy: 723, 11
+  size: 65, 36
+  orig: 74, 52
+  offset: 6, 10
+  index: -1
+007
+  rotate: false
+  xy: 723, 11
+  size: 65, 36
+  orig: 74, 52
+  offset: 6, 10
+  index: -1
+008
+  rotate: false
+  xy: 517, 11
+  size: 69, 36
+  orig: 74, 52
+  offset: 3, 8
+  index: -1
+009
+  rotate: false
+  xy: 517, 11
+  size: 69, 36
+  orig: 74, 52
+  offset: 3, 8
+  index: -1
+010
+  rotate: false
+  xy: 219, 11
+  size: 74, 36
+  orig: 74, 52
+  offset: 0, 7
+  index: -1
+011
+  rotate: false
+  xy: 219, 11
+  size: 74, 36
+  orig: 74, 52
+  offset: 0, 7
+  index: -1
+012
+  rotate: false
+  xy: 371, 10
+  size: 73, 37
+  orig: 74, 52
+  offset: 1, 7
+  index: -1
+013
+  rotate: false
+  xy: 371, 10
+  size: 73, 37
+  orig: 74, 52
+  offset: 1, 7
+  index: -1
+014
+  rotate: false
+  xy: 0, 3
+  size: 70, 44
+  orig: 74, 52
+  offset: 2, 2
+  index: -1
+015
+  rotate: false
+  xy: 0, 3
+  size: 70, 44
+  orig: 74, 52
+  offset: 2, 2
+  index: -1
+016
+  rotate: false
+  xy: 588, 0
+  size: 66, 47
+  orig: 74, 52
+  offset: 4, 0
+  index: -1
+017
+  rotate: false
+  xy: 588, 0
+  size: 66, 47
+  orig: 74, 52
+  offset: 4, 0
+  index: -1
+018
+  rotate: false
+  xy: 72, 3
+  size: 70, 44
+  orig: 74, 52
+  offset: 2, 5
+  index: -1
+019
+  rotate: false
+  xy: 72, 3
+  size: 70, 44
+  orig: 74, 52
+  offset: 2, 5
+  index: -1
+020
+  rotate: false
+  xy: 144, 9
+  size: 73, 38
+  orig: 74, 52
+  offset: 1, 13
+  index: -1
+021
+  rotate: false
+  xy: 144, 9
+  size: 73, 38
+  orig: 74, 52
+  offset: 1, 13
+  index: -1
+022
+  rotate: false
+  xy: 295, 11
+  size: 74, 36
+  orig: 74, 52
+  offset: 0, 16
+  index: -1

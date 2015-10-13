@@ -1,0 +1,13 @@
+
+0.png
+size: 64,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+000
+  rotate: false
+  xy: 0, 0
+  size: 62, 62
+  orig: 96, 96
+  offset: 17, 0
+  index: -1
