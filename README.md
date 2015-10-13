@@ -18,7 +18,6 @@ choco install gradle
 
 On Linux:
 ```
-chmod +x gradlew
 ./gradlew html:dist
 ```
 
