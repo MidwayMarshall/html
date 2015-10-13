@@ -15,6 +15,7 @@ import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
+import com.mygdx.game.battlewindow.TaskService;
 
 public class HtmlLauncher extends GwtApplication {
 
@@ -50,13 +51,14 @@ public class HtmlLauncher extends GwtApplication {
         private ContinuousGameFrame game;
 
         @Override
-        public void setGame(ContinuousGameFrame game) {
+        public TaskService setGame(ContinuousGameFrame game) {
             this.game = game;
             try {
                 setCallBacks();
             } catch (Exception e) {
                 Window.alert("can't find battle");
             }
+            return new TaskService2();
         }
 
         @Override

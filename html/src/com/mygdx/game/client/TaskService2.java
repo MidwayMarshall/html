@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.client;
 
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.TaskService;
@@ -26,10 +26,5 @@ public class TaskService2 implements TaskService {
         busy = true;
         tasks.add(e);
         busy = false;
-    }
-
-    @Override
-    public void send() {
-
     }
 }

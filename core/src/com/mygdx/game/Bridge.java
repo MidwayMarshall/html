@@ -5,12 +5,13 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
+import com.mygdx.game.battlewindow.TaskService;
 
 public interface Bridge {
     public void pause();
     public void unpause();
     public void finished();
-    public void setGame(ContinuousGameFrame game);
+    public TaskService setGame(ContinuousGameFrame game);
     public void alert(String message);
     public TextureAtlas getAtlas(String path);
     public Texture getTexture(String path);

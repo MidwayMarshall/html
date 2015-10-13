@@ -3,20 +3,14 @@ package com.mygdx.game.battlewindow;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.*;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Bridge;
-import com.mygdx.game.TaskService2;
-
-import java.util.Random;
 
 public class ContinuousGameFrame extends ApplicationAdapter implements InputProcessor {
     private static final String TAG = "ContinuousGameFrame";
@@ -57,9 +51,8 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     public void create() {
         objectDebugger = new ShapeRenderer();
         if (bridge != null) {
-            bridge.setGame(this);
+            service = bridge.setGame(this);
 
-            service = new TaskService2();
             call();
 
             calculateGUI();
@@ -160,8 +153,8 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         Rectangle.tmp2.set(xOpp, yOpp, widthOpp, heightOpp);
 
         if (battleAtlas == null) {
-            //battleAtlas = new TextureAtlas(Gdx.files.internal("battle3.txt"));
-            battleAtlas = bridge.getAtlas("battle3.txt");
+            battleAtlas = new TextureAtlas(Gdx.files.internal("battle3.txt"));
+            //battleAtlas = bridge.getAtlas("battle3.txt");
         }
 
         if (font == null) {
