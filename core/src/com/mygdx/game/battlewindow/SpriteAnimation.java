@@ -118,7 +118,7 @@ public class SpriteAnimation extends Animation {
     }
 
     public void startFade() {
-        fader = new Fader(1.5f);
+        fader = new Fader(0.8f);
     }
 
     private class Fader {

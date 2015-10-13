@@ -198,7 +198,7 @@ public class HtmlLauncher extends GwtApplication {
             int duration = change;
             if (duration < 0) duration = -duration;
             if (duration > 100) duration = 100;
-            Event event = new HtmlEvents.AnimatedHPEvent((byte) change, player == me, duration * 30, this);
+            Event event = new HtmlEvents.AnimatedHPEvent((byte) change, player == me, /*duration * 30*/1000, this);
             addEvent(event);
         }
 
@@ -213,7 +213,7 @@ public class HtmlLauncher extends GwtApplication {
                     unpausebattle();
                 }
             };
-            t.schedule(800);
+            t.schedule(1000);
         }
 
         private native void setCallBacks() /*-{
