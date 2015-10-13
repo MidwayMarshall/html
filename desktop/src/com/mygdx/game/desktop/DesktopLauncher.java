@@ -2,6 +2,9 @@ package com.mygdx.game.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
@@ -22,18 +25,14 @@ public class DesktopLauncher {
 		public ContinuousGameFrame game;
 
 		@Override
-		public void pauseSwitch() {
+		public void pause() {
 
 		}
 
 		@Override
-		public void setGame(ContinuousGameFrame game) {
-			this.game = game;
-			//game.animations[1].region = game.animations[1].getKeyFrame(0);
-			//game.animations[1].paused = true;
-		}
+		public void unpause() {
 
-		Random random = new Random();
+		}
 
 		@Override
 		public void finished() {
@@ -41,12 +40,38 @@ public class DesktopLauncher {
 		}
 
 		@Override
-		public void alert(boolean side) {
-			//Event back = new Events.BackgroundChange(random.nextInt(1));
-			//game.service.offer(back);
-			Event log = new Events.LogEvent("THIS IS A REALLY LONG STRING YOU SHOULD WORK NICELY IF IT WRAPS PROPERLY");
-			game.service.offer(log);
-			System.out.println("ALERT!" + side);
+		public void setGame(ContinuousGameFrame game) {
+			this.game = game;
+		}
+
+		@Override
+		public void alert(String message) {
+
+		}
+
+		@Override
+		public TextureAtlas getAtlas(String path) {
+			return null;
+		}
+
+		@Override
+		public Texture getTexture(String path) {
+			return null;
+		}
+
+		@Override
+		public BitmapFont getFont(String path) {
+			return null;
+		}
+
+		@Override
+		public void addEvent(Event event) {
+
+		}
+
+		@Override
+		public void log(String text) {
+
 		}
 	}
 }
