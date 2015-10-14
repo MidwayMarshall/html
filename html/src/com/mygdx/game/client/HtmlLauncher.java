@@ -90,10 +90,10 @@ public class HtmlLauncher extends GwtApplication {
             //Window.alert("Alert from: " + side);
             if (message.equals("true")) {
                 //game.HUDs[0].updatePoke(JavaScriptPokemon.fromJS(getPoke(0, 1)));
-                Window.alert(getPoke(1, 0));
+                Window.alert(getPoke(me, 0));
             } else if (message.equals("false")){
                 //game.HUDs[1].updatePoke(JavaScriptPokemon.fromJS(getPoke(1, 1)));
-                Window.alert(getPoke(0, 0));
+                Window.alert(getPoke(opp, 0));
                 //addEvent(new Events.LogEvent(getBattle()));
             } else {
                 //Window.alert(message);

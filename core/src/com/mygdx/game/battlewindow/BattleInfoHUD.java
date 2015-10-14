@@ -69,8 +69,6 @@ public class BattleInfoHUD {
     private String realHealthString = "";
     private String totalHealthString = "";
 
-    private static int confirmationInt = 0;
-
     public BattleInfoHUD(TextureAtlas atlas, boolean me, float scale, BitmapFont font) {
         this.me = me;
         this.atlas = atlas;
@@ -89,7 +87,6 @@ public class BattleInfoHUD {
         //Log.e("HUD", poke.toString() + " HP to " + poke.lifePercent);
         setHPNonAnimated(poke.percent());
         lastHealth = lifePercent;
-        confirmationInt = confirmationInt + 1;
     }
 
     public void updatePokeNonSpectating(BattlePoke poke) {
@@ -264,9 +261,9 @@ public class BattleInfoHUD {
         if (displayRealHealth) {
             font.draw(batch, realHealthString, xCurrentHealth, yCurrentHealth);
             font.draw(batch, totalHealthString, xTotalHealth, yTotalHealth);
-            font.draw(batch, level + " " + confirmationInt, xLevel, yLevel);
+            font.draw(batch, level + "", xLevel, yLevel);
         } else {
-            font.draw(batch, level + " " + confirmationInt, xLevel, yLevel);
+            font.draw(batch, level + "", xLevel, yLevel);
         }
         font.draw(batch, name, xName, yName);
     }

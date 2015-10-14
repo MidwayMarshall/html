@@ -64,15 +64,15 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
         return this.shiny;
     }-*/;
 
+    private native int getStatus() /*-{
+        return this.status;
+    }-*/;
+
     public static native JavaScriptPokemon fromJS(String json) /*-{
         return eval('(' + json + ')');
     }-*/;
 
     public static native String pokemonName(int num) /*-{
         return $wnd.pokeinfo.name(num);
-    }-*/;
-
-    public static native int getStatus() /*-{
-        return this.status;
     }-*/;
 }
