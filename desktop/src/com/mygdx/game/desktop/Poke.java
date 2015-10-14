@@ -10,6 +10,8 @@ public class Poke implements JSONPoke {
     boolean shiny;
     int status;
     byte percent;
+    short life;
+    short totallife;
 
     public Poke(byte level, String name, short num, byte gender, byte percent, int status) {
         this.level = level;
@@ -18,6 +20,17 @@ public class Poke implements JSONPoke {
         this.gender = gender;
         this.percent = percent;
         this.status = status;
+    }
+
+    public Poke(byte level, String name, short num, byte gender, byte percent, int status, short life, short totallife) {
+        this.level = level;
+        this.name = name;
+        this.num = num;
+        this.gender = gender;
+        this.percent = percent;
+        this.status = status;
+        this.life = life;
+        this.totallife = life;
     }
 
     @Override
@@ -53,5 +66,15 @@ public class Poke implements JSONPoke {
     @Override
     public int status() {
         return status;
+    }
+
+    @Override
+    public short life() {
+        return life;
+    }
+
+    @Override
+    public short totallife() {
+        return totallife;
     }
 }

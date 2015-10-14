@@ -4,7 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
@@ -31,6 +33,11 @@ public class DesktopLauncher {
 
 		}
 
+		ParticleEffect effect = new ParticleEffect();
+		public void specialplay(Batch batch, float delta) {
+			effect.draw(batch, delta);
+		}
+
 		@Override
 		public void unpause() {
 
@@ -38,7 +45,8 @@ public class DesktopLauncher {
 
 		@Override
 		public void finished() {
-
+			effect.load(Gdx.files.internal("betterrain"), Gdx.files.internal(""));
+			effect.setPosition(-100, Gdx.graphics.getHeight());
 		}
 
 		@Override
@@ -48,21 +56,27 @@ public class DesktopLauncher {
 			Random random = new Random();
 			int randomNum = random.nextInt(37);
 			service.offer(new Events.BackgroundChange(randomNum));
-			Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
+			//Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
+			mebattle = new Poke((byte) 100, "test", (short) 4, (byte)1,(byte) 100,(short) 0,(short) 100,(short) 100);
 			Poke opp = new Poke((byte) (random.nextInt(100) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
-			service.offer(new Events.SpriteChange(me, true));
+			service.offer(new Events.SpriteChange(mebattle, true));
 			service.offer(new Events.SpriteChange(opp, false));
-			service.offer(new Events.HUDChange(me, true));
+			service.offer(new Events.HUDChangeBattling(mebattle));
+			//service.offer(new Events.HUDChange(me, true));
 			service.offer(new Events.HUDChange(opp, false));
 			return service;
 		}
+		Poke mebattle;
 
 		@Override
 		public void alert(String message) {
 			if (message == "true") {
-				game.service.offer(new Events.KO(true));
+				//game.service.offer(new Events.KO(true));
+				mebattle.percent -= 10;
+				mebattle.life -= 10;
+				game.service.offer(new Events.SetHPBattlingAnimated(mebattle.percent(), mebattle.life() ,1f));
 			} else if (message == "false") {
-				game.service.offer(new Events.KO(false));
+				//game.service.offer(new Events.KO(false));
 			} else {
 				log(message);
 			}
