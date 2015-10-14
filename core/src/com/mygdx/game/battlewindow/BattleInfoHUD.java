@@ -5,8 +5,6 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.mygdx.game.BattlePoke;
-import com.mygdx.game.Bridge;
 import com.mygdx.game.JSONPoke;
 
 public class BattleInfoHUD {
@@ -89,12 +87,12 @@ public class BattleInfoHUD {
         lastHealth = lifePercent;
     }
 
-    public void updatePokeNonSpectating(BattlePoke poke) {
-        updateName(poke.nick, (byte) poke.gender);
-        totalHeath = poke.totalHP;
+    public void updatePokeNonSpectating(JSONPoke poke) {
+        updateName(poke.name(), (byte) poke.gender());
+        totalHeath = poke.totallife();
         totalHealthString = FontShifter.parseBlackNumber(totalHeath);
-        level = poke.level;
-        lifePercent = (byte) ((poke.currentHP * 100) / (poke.totalHP));
+        level = poke.level();
+        lifePercent = (byte) ((poke.life() * 100) / (poke.totallife()));
         lastHealth = lifePercent;
         updateStatus(poke.status());
         if (!displayRealHealth) {
@@ -111,7 +109,7 @@ public class BattleInfoHUD {
             displayRealHealth = true;
         }
         setHPNonAnimated(lifePercent);
-        updateRealHealth(poke.currentHP);
+        updateRealHealth(poke.life());
     }
 
 
@@ -139,14 +137,6 @@ public class BattleInfoHUD {
         }
     }
 
-    public void setHP(byte newPercent) {
-        healthAction.newAction(newPercent, 4f);
-    }
-
-    public void setHP(byte newPercent, float duration) {
-        healthAction.newAction(newPercent, duration);
-    }
-
     public void setChangeHP(byte change, float duration) {
         int newpercent = lifePercent - change;
         if (newpercent > 100)   newpercent = 100; else
@@ -154,11 +144,7 @@ public class BattleInfoHUD {
         healthAction.newAction((byte) (newpercent), duration);
     }
 
-    public void setHP(byte newPercent, short newHP) {
-        healthAction.newAction(newPercent, newHP, 4.5f);
-    }
-
-    public void setHP(byte newPercent, short newHP, float duration) {
+    public void setHPBattling(byte newPercent, short newHP, float duration) {
         healthAction.newAction(newPercent, newHP, duration);
     }
 
@@ -252,6 +238,7 @@ public class BattleInfoHUD {
         }
     }
 
+    /*
     public void draw(float delta, Batch batch) {
         //act(delta);
         batch.draw(mainHUD, xHUD, yHUD, widthHUD, heightHUD);
@@ -266,7 +253,8 @@ public class BattleInfoHUD {
             font.draw(batch, level + "", xLevel, yLevel);
         }
         font.draw(batch, name, xName, yName);
-    }
+    }*/
+
 
     public void draw(Batch batch) {
         batch.draw(mainHUD, xHUD, yHUD, widthHUD, heightHUD);
@@ -283,10 +271,11 @@ public class BattleInfoHUD {
         font.draw(batch, name, xName, yName);
     }
 
+    /*
     public void updateRealHealth(byte percent, short health) {
         updateRealHealth(health);
         setHPNonAnimated(percent);
-    }
+    }*/
 
     public void updateRealHealth(short health) {
         int length = Short.toString(health).length();
@@ -294,6 +283,13 @@ public class BattleInfoHUD {
         xCurrentHealth = Math.round(xHUD + (79 - 7 * length) * scale * 1.7f);
         realHealthString = FontShifter.parseBlackNumber(realHealth);
         lastRealHealth = realHealth;
+    }
+
+    private void updateRealHealthAnimator(short health) {
+        int length = Short.toString(health).length();
+        realHealth = health;
+        xCurrentHealth = Math.round(xHUD + (79 - 7 * length) * scale * 1.7f);
+        realHealthString = FontShifter.parseBlackNumber(realHealth);
     }
 
     public void updateHealthBar() {
@@ -329,6 +325,7 @@ public class BattleInfoHUD {
                 break;
         }
     }
+
 
     private class HealthAction {
         private byte endPercent;
@@ -374,10 +371,9 @@ public class BattleInfoHUD {
                     } else {
                         remaining -= delta;
                         float percent = 1f - remaining / duration;
-                        lifePercent = (byte) (lastHealth - (percent * 100 * (lastHealth - endPercent)) / 100);
+                        lifePercent = (byte) (lastHealth - (percent * (lastHealth - endPercent)));
                         updateHealthBar();
-                        realHealth = (short) (lastRealHealth - (percent * (lastRealHealth - endHP)));
-                        updateRealHealth(realHealth);
+                        updateRealHealthAnimator((short) (lastRealHealth - (percent * (lastRealHealth - endHP))));
                     }
                 } else {
                     if (delta > remaining) {
@@ -389,7 +385,7 @@ public class BattleInfoHUD {
                     } else {
                         remaining -= delta;
                         float percent = 1f - remaining / duration;
-                        lifePercent = (byte) (lastHealth - (percent * 100 * (lastHealth - endPercent)) / 100);
+                        lifePercent = (byte) (lastHealth - (percent * (lastHealth - endPercent)));
                         updateHealthBar();
                     }
                 }

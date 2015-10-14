@@ -42,6 +42,16 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
         return getStatus();
     }
 
+    @Override
+    public final short life() {
+        return getLife();
+    }
+
+    @Override
+    public final short totallife() {
+        return getTotalLife();
+    }
+
     private native byte getGender() /*-{
         return this.gender;
     }-*/;
@@ -66,6 +76,14 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
 
     private native int getStatus() /*-{
         return this.status;
+    }-*/;
+
+    private native short getTotalLife() /*-{
+        return this.totalLife;
+    }-*/;
+
+    private native short getLife() /*-{
+        return this.life;
     }-*/;
 
     public static native JavaScriptPokemon fromJS(String json) /*-{

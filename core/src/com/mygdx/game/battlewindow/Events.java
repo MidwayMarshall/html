@@ -1,13 +1,12 @@
 package com.mygdx.game.battlewindow;
 
-
-import com.mygdx.game.BattlePoke;
 import com.mygdx.game.JSONPoke;
 
 public class Events {
     private Events() {
     }
 
+    /*
     public static class SetHPAnimated implements Event {
         byte HP;
         boolean side;
@@ -21,7 +20,7 @@ public class Events {
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.HUDs[(side ? 0 : 1)].setHP(HP, duration);
+            Frame.HUDs[(side ? 0 : 1)].setChangeHPBattling(HP, duration);
             //       Log.e("Event", "SetHPAnimated " + log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
     }
@@ -59,6 +58,8 @@ public class Events {
             //        Log.e("Event", "SetHPBattling " + log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
     }
+    */
+
 
     public static class SetHPBattlingAnimated implements Event {
         byte percent;
@@ -73,15 +74,15 @@ public class Events {
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.HUDs[0].setHP(percent, HP, duration);
+            Frame.HUDs[0].setHPBattling(percent, HP, duration);
             //          Log.e("Event", "SetHPBattlingAnimated " +  log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
     }
 
     public static class HUDChangeBattling implements Event {
-        BattlePoke poke;
+        JSONPoke poke;
 
-        public HUDChangeBattling(BattlePoke poke) {
+        public HUDChangeBattling(JSONPoke poke) {
             this.poke = poke;
         }
 
@@ -173,6 +174,7 @@ public class Events {
         }
     }
 
+    /*
     public static class SendOut implements Event {
         JSONPoke poke;
         boolean side;
@@ -194,6 +196,7 @@ public class Events {
             return path;
         }
     }
+    */
 
     /*
     public static class SendBack implements Event {

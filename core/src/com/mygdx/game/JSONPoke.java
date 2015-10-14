@@ -8,4 +8,6 @@ public interface JSONPoke {
     public byte percent();
     public boolean shiny();
     public int status();
+    public short life();
+    public short totallife();
 }

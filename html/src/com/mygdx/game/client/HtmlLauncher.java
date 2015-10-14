@@ -34,6 +34,8 @@ public class HtmlLauncher extends GwtApplication {
 
     public static class HtmlBridge implements Bridge {
         byte me, opp;
+        boolean isBattle;
+
         @Override
         public TextureAtlas getAtlas(String path) {
             return Assets.getAtlas(path);
@@ -90,10 +92,10 @@ public class HtmlLauncher extends GwtApplication {
             //Window.alert("Alert from: " + side);
             if (message.equals("true")) {
                 //game.HUDs[0].updatePoke(JavaScriptPokemon.fromJS(getPoke(0, 1)));
-                Window.alert(getPoke(me, 0));
+                Window.alert(getPoke(this.me, 0));
             } else if (message.equals("false")){
                 //game.HUDs[1].updatePoke(JavaScriptPokemon.fromJS(getPoke(1, 1)));
-                Window.alert(getPoke(opp, 0));
+                Window.alert(getPoke(this.opp, 0));
                 //addEvent(new Events.LogEvent(getBattle()));
             } else {
                 //Window.alert(message);
@@ -102,45 +104,43 @@ public class HtmlLauncher extends GwtApplication {
 
         @Override
         public void finished() {
-            Logger.println("finished");
+            //Logger.println("finished");
             int randomNum = Random.nextInt(37);
             HtmlEvents.DelayedEvent event = new HtmlEvents.DelayedEvent(new Events.BackgroundChange(randomNum), this, 2);
             addEvent(event);
-            unpausebattle();
-            ///final HtmlBridge that = this;
+            me = (byte) getMe();
+            opp = (byte) getOpp();
+            isBattle = getIsBattle();
+            //Logger.println("Is real? " + isBattle);
+            //Logger.println("My Pokemon " + getPoke(this.me, 0));
+            //Logger.println("Opp Pokemon " + getPoke(this.opp, 0));
+
+            JavaScriptPokemon me = JavaScriptPokemon.fromJS(getPoke(this.me, 0));
+            if (isBattle) {
+                game.HUDs[0].updatePokeNonSpectating(me);
+            } else {
+                game.HUDs[0].updatePoke(me);
+            }
+            if (me.num() > 0) {
+                HtmlEvents.DelayedEvent eventme = new HtmlEvents.DelayedEvent(new Events.SpriteChange(me, true), this, 1);
+                addEvent(eventme);
+            }
+
+            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(this.opp, 0));
+            game.HUDs[1].updatePoke(opp);
+            if (opp.num() > 0) {
+                HtmlEvents.DelayedEvent eventopp = new HtmlEvents.DelayedEvent(new Events.SpriteChange(opp, false), this, 1);
+                addEvent(eventopp);
+            }
+
             Timer t = new Timer() {
                 @Override
                 public void run() {
-                    me = (byte) getMe();
-                    opp = (byte) getOpp();
-                    Logger.println("Me " + me);
-                    Logger.println("Opp " + opp);
-                    init();
                     unpausebattle();
                 }
             };
 
             t.schedule(2000);
-        }
-
-        private void init() {
-            // Window finished loading, let's send information
-            JavaScriptPokemon me = JavaScriptPokemon.fromJS(getPoke(this.me, 0));
-            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(this.opp, 0));
-            Logger.println("My Pokemon " + getPoke(this.me, 0));
-            Logger.println("Opp Pokemon " + getPoke(this.opp, 0));
-            game.HUDs[0].updatePoke(me);
-            game.HUDs[1].updatePoke(opp);
-            if (me.num() > 0) {
-                HtmlEvents.DelayedEvent eventme = new HtmlEvents.DelayedEvent(new Events.SpriteChange(me, true), this, 1);
-                addEvent(eventme);
-            }
-            if (opp.num() > 0) {
-                HtmlEvents.DelayedEvent eventopp = new HtmlEvents.DelayedEvent(new Events.SpriteChange(opp, false), this, 1);
-                addEvent(eventopp);
-            }
-            //addEvent(new Events.SpriteChange(true, me.num() + ".atlas", false));
-            //addEvent(new Events.SpriteChange(false, opp.num() + ".atlas", false));
         }
 
         @Override
@@ -166,7 +166,16 @@ public class HtmlLauncher extends GwtApplication {
             //Logger.println("sendout");
             JavaScriptPokemon poke = JavaScriptPokemon.fromJS(getPoke(player, 0));
             boolean side = player == me;
-            Event event = new Events.HUDChange(poke, side);
+            Event event;
+            if (side) {
+                if (isBattle) {
+                    event = new Events.HUDChangeBattling(poke);
+                } else {
+                    event = new Events.HUDChange(poke, true);
+                }
+            } else {
+                event = new Events.HUDChange(poke, false);
+            }
             addEvent(event);
             HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, side), this, 1);
             addEvent(event1);
@@ -187,7 +196,7 @@ public class HtmlLauncher extends GwtApplication {
         }
 
         public void dealWithStatusChange(int player, int status) {
-            Logger.println("statuschange");
+            //Logger.println("statuschange");
             Event event = new Events.StatusChange(player == me, status);
             addEvent(event);
         }
@@ -195,11 +204,30 @@ public class HtmlLauncher extends GwtApplication {
         public void dealWithHpChange(int player, int change) {
             //Logger.println("hpchange");
             pausebattle();
+            /*
             int duration = change;
             if (duration < 0) duration = -duration;
-            if (duration > 100) duration = 100;
-            Event event = new HtmlEvents.AnimatedHPEvent((byte) change, player == me, /*duration * 30*/1000, this);
+            if (duration > 100) duration = 100;*/
+            boolean side = player == me;
+            if (side && isBattle) {
+                dealWithHpChangeBattling();
+            } else {
+                Event event = new HtmlEvents.AnimatedHPEvent((byte) change, side, /*duration * 30*/1000, this);
+                addEvent(event);
+            }
+        }
+
+        private void dealWithHpChangeBattling() {
+            JavaScriptPokemon my = JavaScriptPokemon.fromJS(getPoke(me, 0));
+            Logger.println("new percent " + my.percent() + "  " + my.life());
+            Event event = new Events.SetHPBattlingAnimated(my.percent(), my.life(), 2f);
             addEvent(event);
+            new Timer() {
+                @Override
+                public void run() {
+                    unpausebattle();
+                }
+            }.schedule(1000);
         }
 
         public void dealWithKo(int player) {
@@ -262,6 +290,11 @@ public class HtmlLauncher extends GwtApplication {
         private static native int getOpp() /*-{
             var opp = $wnd.battle.opponent;
             return opp;
+        }-*/;
+
+        private static native boolean getIsBattle() /*-{
+            var isBattle = $wnd.battle.isBattle();
+            return isBattle;
         }-*/;
     }
 
