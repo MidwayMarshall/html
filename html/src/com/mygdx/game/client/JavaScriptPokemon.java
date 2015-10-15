@@ -43,6 +43,11 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
     }
 
     @Override
+    public final byte forme() {
+        return getforme();
+    }
+
+    @Override
     public final short life() {
         return getLife();
     }
@@ -76,6 +81,10 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
 
     private native int getStatus() /*-{
         return this.status;
+    }-*/;
+
+    private native byte getforme() /*-{
+        return this.forme;
     }-*/;
 
     private native short getTotalLife() /*-{

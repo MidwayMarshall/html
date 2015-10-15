@@ -8,7 +8,7 @@ import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
 
 public class HtmlEvents {
-    public static class DelayedEvent implements Event, FinishedListener {
+    public static class DelayedEvent implements Event, DownloaderListener {
         /* If an asset doesn't exist the client need to download from the server and when finished fire the event that requires the resource */
         private Event event;
         private Bridge bridge;
@@ -52,13 +52,39 @@ public class HtmlEvents {
             }
         }
 
+        @Override
         public synchronized void finished() {
             queueSize--;
             //Logger.println("Queue remaining " + queueSize + " type: " + type);
             if (queueSize == 0) {
                 bridge.addEvent(event);
-            } else {
+            }
+        }
 
+        @Override
+        public void failure(String url) {
+            if (url.contains(".png")) {
+                switch (type) {
+                    case 1: {
+                        // Could we revert the forme?
+                        Events.SpriteChange sendevent = (Events.SpriteChange) this.event;
+                        String path = sendevent.getPath();
+                        if (path.contains("_")) {
+                            // It is a forme
+                            sendevent.setPath(path.substring(0, path.indexOf("_")));
+                            // Try again without forme;
+                            MyAssetChecker.checkText(sendevent.getPath() + ".atlas", this);
+                            MyAssetChecker.checkImage(sendevent.getPath() + ".png", this);
+                        } else {
+                            Logger.println("404 Error " + path);
+                        }
+                        break;
+                    }
+                    default: {
+                        Logger.println("404 Error");
+                        break;
+                    }
+                }
             }
         }
     }

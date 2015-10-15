@@ -125,6 +125,9 @@ public class Events {
             this.poke = poke;
             this.side = side;
             this.path = (side ? "back/" : "front/") + Short.toString(poke.num());
+            if (poke.forme() > 0) {
+                this.path = this.path + "_" + Byte.toString(poke.forme());
+            }
         }
 
         @Override
@@ -135,6 +138,10 @@ public class Events {
 
         public String getPath() {
             return path;
+        }
+
+        public void setPath(String path) {
+            this.path = path;
         }
     }
 

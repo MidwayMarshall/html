@@ -10,7 +10,7 @@ public class MyAssetChecker {
     private static final AssetDownloader downloader = new AssetDownloader();
     private static Preloader preloader;
 
-    public static void checkText(final String assetUrl, final FinishedListener listener) {
+    public static void checkText(final String assetUrl, final DownloaderListener listener) {
         if (Gdx.files.internal(assetUrl).exists()) {
             // Asset already is loaded
             listener.finished();
@@ -40,7 +40,7 @@ public class MyAssetChecker {
         }
     }
 
-    public static void checkImage(final String assetUrl, final FinishedListener listener) {
+    public static void checkImage(final String assetUrl, final DownloaderListener listener) {
         if (Gdx.files.internal(assetUrl).exists()) {
             // Asset already is loaded
             listener.finished();
@@ -56,7 +56,7 @@ public class MyAssetChecker {
 
                 @Override
                 public void onFailure() {
-
+                    listener.failure(url);
                 }
 
                 @Override

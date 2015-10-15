@@ -77,4 +77,9 @@ public class Poke implements JSONPoke {
     public short totallife() {
         return totallife;
     }
+
+    @Override
+    public byte forme() {
+        return 0;
+    }
 }
