@@ -204,30 +204,33 @@ public class HtmlLauncher extends GwtApplication {
         public void dealWithHpChange(int player, int change) {
             //Logger.println("hpchange");
             pausebattle();
-            /*
+
             int duration = change;
-            if (duration < 0) duration = -duration;
-            if (duration > 100) duration = 100;*/
+            duration = Math.min(100, Math.abs(duration));
+
+            /* Delay varying between 700ms and 1300 ms depending on how much hp */
+            duration = 700 + duration*6;
+
             boolean side = player == me;
             if (side && isBattle) {
-                dealWithHpChangeBattling();
+                dealWithHpChangeBattling(duration);
             } else {
-                Event event = new HtmlEvents.AnimatedHPEvent((byte) change, side, /*duration * 30*/1000, this);
+                Event event = new HtmlEvents.AnimatedHPEvent((byte) change, side, duration, this);
                 addEvent(event);
             }
         }
 
-        private void dealWithHpChangeBattling() {
+        private void dealWithHpChangeBattling(int duration) {
             JavaScriptPokemon my = JavaScriptPokemon.fromJS(getPoke(me, 0));
             Logger.println("new percent " + my.percent() + "  " + my.life());
-            Event event = new Events.SetHPBattlingAnimated(my.percent(), my.life(), 2f);
+            Event event = new Events.SetHPBattlingAnimated(my.percent(), my.life(), duration/1000f);
             addEvent(event);
             new Timer() {
                 @Override
                 public void run() {
                     unpausebattle();
                 }
-            }.schedule(1000);
+            }.schedule(duration + 120);
         }
 
         public void dealWithKo(int player) {
