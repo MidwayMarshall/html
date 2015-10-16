@@ -109,7 +109,18 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                 batch.begin();
                 draw();
                 batch.end();
-                //renderDebugObjects();
+
+                //batch.setColor(new Color(0xDEAC00FF));
+                /*
+                Gdx.gl20.glEnable(GL20.GL_BLEND);
+                Gdx.gl20.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+                objectDebugger.begin(ShapeRenderer.ShapeType.Filled);
+                objectDebugger.setColor(new Color(0xDEAC007F));
+                objectDebugger.rect(0, 0, 600, 400);
+                objectDebugger.end();
+                Gdx.gl20.glDisable(GL20.GL_BLEND);
+                */
+                renderDebugObjects();
                 break;
             }
             case STATUS_PAUSED: {

@@ -13,23 +13,24 @@ public class SpriteAnimation extends Animation {
 
     public SpriteAnimation(float frameDuration, Array<? extends TextureRegion> keyFrames) {
         super(frameDuration, keyFrames);
-        fader = new Fader();
     }
 
     public SpriteAnimation(float frameDuration, Array<? extends TextureRegion> keyFrames, PlayMode playMode) {
         super(frameDuration, keyFrames, playMode);
-        fader = new Fader();
     }
 
     public SpriteAnimation(float frameDuration, TextureRegion... keyFrames) {
         super(frameDuration, keyFrames);
-        fader = new Fader();
     }
 
     private float scale = 1f;
 
     public void setScale(float scale) {
         this.scale = scale;
+    }
+
+    public void scaleDown() {
+        scale = scale * .9f;
     }
 
     public void dispose() {
@@ -43,8 +44,9 @@ public class SpriteAnimation extends Animation {
     public boolean visible = true;
 
     private TextureRegion region;
-    private Fader fader;
+    private Fader fader = new Fader();
     private float alpha = 1f;
+    private Scaler scaler = new Scaler();
 
     public void draw(float time, Batch batch) {
         if (visible) {
@@ -63,10 +65,13 @@ public class SpriteAnimation extends Animation {
         }
     }
 
+    private float originalScale;
+
     private void draw(Batch batch) {
-        offX = ((TextureAtlas.AtlasRegion) region).offsetX * scale;
-        offY = ((TextureAtlas.AtlasRegion) region).offsetY * scale;
-        batch.draw(region, x + offX, y + offY, region.getRegionWidth() * scale, region.getRegionHeight() * scale);
+        offX = ((TextureAtlas.AtlasRegion) region).offsetX * originalScale;
+        offY = ((TextureAtlas.AtlasRegion) region).offsetY * originalScale;
+        float xx = x + (region.getRegionWidth() * (originalScale - scale) / 2) + offX;
+        batch.draw(region, xx, y + offY, region.getRegionWidth() * scale, region.getRegionHeight() * scale);
     }
 
     // 400/240
@@ -111,10 +116,13 @@ public class SpriteAnimation extends Animation {
 
         difference = rect.height - height;
         y = rect.y + (difference / 2f) - maxOffY / 2f;
+
+        originalScale = scale;
     }
 
     public void act(float delta) {
         fader.update(delta);
+        scaler.update(delta);
     }
 
     public void startFade() {
@@ -143,6 +151,43 @@ public class SpriteAnimation extends Animation {
                 } else {
                     remaining -= delta;
                     alpha = remaining / duration;
+                }
+            }
+        }
+    }
+
+    public void startScale() {
+        scaler = new Scaler(0.2f);
+    }
+
+    private class Scaler {
+        private float duration;
+        private float remaining;
+        private boolean running = false;
+        private float endingScale;
+        private float initialScale;
+
+        private Scaler() {}
+
+        private Scaler(float duration) {
+            this.duration = duration;
+            remaining = duration;
+            running = true;
+            endingScale = scale / 2;
+            initialScale = scale;
+        }
+
+        private void update(float delta) {
+            if (running) {
+                if (delta > remaining) {
+                    running = false;
+                    scale = endingScale;
+                    remaining = 0f;
+                    fader = new Fader(0.3f);
+                } else {
+                    remaining -= delta;
+                    float percent = 1f - remaining / duration;
+                    scale = initialScale - ((float) Math.pow(percent, 2)) * endingScale;
                 }
             }
         }

@@ -35,7 +35,7 @@ public class DesktopLauncher {
 
 		ParticleEffect effect = new ParticleEffect();
 		public void specialplay(Batch batch, float delta) {
-			effect.draw(batch, delta);
+			//effect.draw(batch, delta);
 		}
 
 		@Override
@@ -45,8 +45,8 @@ public class DesktopLauncher {
 
 		@Override
 		public void finished() {
-			effect.load(Gdx.files.internal("betterrain"), Gdx.files.internal(""));
-			effect.setPosition(-100, Gdx.graphics.getHeight());
+			effect.load(Gdx.files.internal("sandstorm"), Gdx.files.internal(""));
+			effect.setPosition(Gdx.graphics.getWidth()/2 + 100, Gdx.graphics.getHeight());
 		}
 
 		@Override
@@ -56,13 +56,13 @@ public class DesktopLauncher {
 			Random random = new Random();
 			int randomNum = random.nextInt(37);
 			service.offer(new Events.BackgroundChange(randomNum));
-			//Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
-			mebattle = new Poke((byte) 100, "test", (short) 4, (byte)1,(byte) 100,(short) 0,(short) 100,(short) 100);
+			Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
+			//mebattle = new Poke((byte) 100, "test", (short) 4, (byte)1,(byte) 100,(short) 0,(short) 100,(short) 100);
 			Poke opp = new Poke((byte) (random.nextInt(100) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
-			service.offer(new Events.SpriteChange(mebattle, true));
+			service.offer(new Events.SpriteChange(me, true));
 			service.offer(new Events.SpriteChange(opp, false));
-			service.offer(new Events.HUDChangeBattling(mebattle));
-			//service.offer(new Events.HUDChange(me, true));
+			//service.offer(new Events.HUDChangeBattling(mebattle));
+			service.offer(new Events.HUDChange(me, true));
 			service.offer(new Events.HUDChange(opp, false));
 			return service;
 		}
@@ -72,11 +72,10 @@ public class DesktopLauncher {
 		public void alert(String message) {
 			if (message == "true") {
 				//game.service.offer(new Events.KO(true));
-				mebattle.percent -= 10;
-				mebattle.life -= 10;
-				game.service.offer(new Events.SetHPBattlingAnimated(mebattle.percent(), mebattle.life() ,1f));
+				game.service.offer(new Events.Scale(true));
 			} else if (message == "false") {
 				//game.service.offer(new Events.KO(false));
+				game.service.offer(new Events.Scale(false));
 			} else {
 				log(message);
 			}
