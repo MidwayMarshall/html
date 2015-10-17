@@ -9,8 +9,6 @@ import com.badlogic.gdx.utils.Array;
 
 public class SpriteAnimation extends Animation {
 
-
-
     public SpriteAnimation(float frameDuration, Array<? extends TextureRegion> keyFrames) {
         super(frameDuration, keyFrames);
     }

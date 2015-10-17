@@ -11,6 +11,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Bridge;
 
+/*
+    Core application.
+
+    Uses a bridge (Html, Desktop or Android) to interface with particular platform.
+
+ */
 public class ContinuousGameFrame extends ApplicationAdapter implements InputProcessor {
     private static final String TAG = "ContinuousGameFrame";
     public TaskService service;
@@ -76,6 +82,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
     Event event;
 
+    /* Main rendering loop */
     @Override
     public void render() {
         delta = Gdx.graphics.getDeltaTime();
@@ -142,6 +149,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         */
     }
 
+    /* Calculate sprite positions depending on dimensions of the window */
     private void calculateGUI() {
         batch = new SpriteBatch();
 
