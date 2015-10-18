@@ -1,5 +1,8 @@
 package com.mygdx.game.battlewindow;
 
+import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
+import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.mygdx.game.JSONPoke;
 
 public class Events {
@@ -90,7 +93,7 @@ public class Events {
         public void run(ContinuousGameFrame Frame) {
             Frame.HUDs[0].updatePokeNonSpectating(poke);
             if (poke.status() == 31) {
-                Frame.sprites[0].paused = true;
+                //Frame.sprites[0].paused = true;
             }
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
@@ -159,7 +162,7 @@ public class Events {
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
             Frame.HUDs[(side ? 0 : 1)].updateStatus(status);
             if (status == 31) {
-                Frame.sprites[(side ? 0 : 1)].paused = true;
+                //Frame.sprites[(side ? 0 : 1)].paused = true;
             }
         }
     }
@@ -205,20 +208,18 @@ public class Events {
     }
     */
 
-    /*
-    public static class SendBack implements Event {
-        byte player;
+    public static class Hide implements Event {
+        boolean side;
 
-        public SendBack(byte player) {
-            this.player = player;
+        public Hide(boolean side) {
+            this.side = side;
         }
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.sprites[player].visible = false;
+            //Frame.sprites[(side ? 0 : 1)].visible = false;
         }
     }
-    */
 
     public static class KO implements Event {
         boolean side;
@@ -229,23 +230,55 @@ public class Events {
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.sprites[(side ? 0 : 1)].paused = true;
-            Frame.sprites[(side ? 0 : 1)].startFade();
+            //Frame.sprites[(side ? 0 : 1)].paused = true;
+            //Frame.sprites[(side ? 0 : 1)].startFade();
+
+            FadeToAction fade = new FadeToAction();
+            fade.setDuration(0.8f);
+            fade.setAlpha(0f);
+
+            VisibleAction visible  = new VisibleAction();
+            visible.setVisible(false);
+
+            SequenceAction sequence = new SequenceAction();
+            sequence.addAction(fade);
+            sequence.addAction(visible);
+
+            Frame.sprites[(side ? 0 : 1)].pause();
+            Frame.sprites[(side ? 0 : 1)].addAction(sequence);
             Frame.HUDs[(side ? 0 : 1)].updateStatus(31); // 31 = Koed
         }
     }
 
-    public static class Scale implements Event {
+    public static class SendBack implements Event {
         boolean side;
 
-        public Scale(boolean side) {
+        public SendBack(boolean side) {
             this.side = side;
         }
 
         @Override
         public void run(ContinuousGameFrame Frame) {
-            Frame.sprites[(side ? 0 : 1)].paused = true;
-            Frame.sprites[(side ? 0 : 1)].startScale();
+            //Frame.sprites[(side ? 0 : 1)].paused = true;
+            //Frame.sprites[(side ? 0 : 1)].startScale();
+            ScaleToAction action = new ScaleToAction();
+            action.setScale(0.5f * Frame.sprites[(side ? 0 : 1)].getScaleX());
+            action.setDuration(.4f);
+
+            FadeToAction fade = new FadeToAction();
+            fade.setDuration(.2f);
+            fade.setAlpha(0f);
+
+            VisibleAction visible  = new VisibleAction();
+            visible.setVisible(false);
+
+            SequenceAction sequence = new SequenceAction();
+            sequence.addAction(action);
+            sequence.addAction(fade);
+            sequence.addAction(visible);
+
+            Frame.sprites[(side ? 0 : 1)].pause();
+            Frame.sprites[(side ? 0 : 1)].addAction(sequence);
         }
     }
  }

@@ -184,15 +184,15 @@ public class HtmlLauncher extends GwtApplication {
         public void dealWithSendBack(int player) {
             //Logger.println("sendback");
             pausebattle();
-            //Event event = new Events.SendBack((byte) player);
-            //addEvent(event);
+            Event event = new Events.SendBack(player == me);
+            addEvent(event);
             Timer t = new Timer() {
                 @Override
                 public void run() {
                     unpausebattle();
                 }
             };
-            t.schedule(500);
+            t.schedule(600);
         }
 
         public void dealWithStatusChange(int player, int status) {

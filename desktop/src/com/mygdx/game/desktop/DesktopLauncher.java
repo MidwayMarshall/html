@@ -58,7 +58,7 @@ public class DesktopLauncher {
 			service.offer(new Events.BackgroundChange(randomNum));
 			Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
 			//mebattle = new Poke((byte) 100, "test", (short) 4, (byte)1,(byte) 100,(short) 0,(short) 100,(short) 100);
-			Poke opp = new Poke((byte) (random.nextInt(100) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
+			Poke opp = new Poke((byte) (random.nextInt(100) + 5), "Test", (short) 49, (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
 			service.offer(new Events.SpriteChange(me, true));
 			service.offer(new Events.SpriteChange(opp, false));
 			//service.offer(new Events.HUDChangeBattling(mebattle));
@@ -72,10 +72,10 @@ public class DesktopLauncher {
 		public void alert(String message) {
 			if (message == "true") {
 				//game.service.offer(new Events.KO(true));
-				game.service.offer(new Events.Scale(true));
+				game.service.offer(new Events.KO(true));
 			} else if (message == "false") {
 				//game.service.offer(new Events.KO(false));
-				game.service.offer(new Events.Scale(false));
+				game.service.offer(new Events.SendBack(false));
 			} else {
 				log(message);
 			}

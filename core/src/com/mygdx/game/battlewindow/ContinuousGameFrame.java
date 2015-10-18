@@ -21,7 +21,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
     public SpriteBatch batch;
     private Image background;
-    public SpriteAnimation[] sprites = new SpriteAnimation[2];
+    public AnimatedActor[] sprites = new AnimatedActor[2];
     public TextureAtlas[] spriteAtlas = new TextureAtlas[2];
     public BattleInfoHUD[] HUDs = new BattleInfoHUD[2];
 
@@ -33,7 +33,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     private final static int STATUS_PAUSED = 2;
     private int STATUS_CURRENT = STATUS_INIT;
 
-    private float elapsedTime = 0f;
+    public static float elapsedTime = 0f;
     private float width;
     private float height;
     private float scaledX;
@@ -58,12 +58,14 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
             //setBackground(backgroundId);
 
+            sprites[me] = new AnimatedActor(true);
+            sprites[opp] = new AnimatedActor(false);
+
             HUDs[me] = new BattleInfoHUD(battleAtlas, true, scaledX, font);
             HUDs[opp] = new BattleInfoHUD(battleAtlas, false, scaledX, font);
 
             Gdx.input.setInputProcessor(this);
             bridge.finished();
-            STATUS_CURRENT = STATUS_RUNNING;
         }
     }
 
@@ -199,7 +201,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     public void resume() {
         super.resume();
         if (sprites[me] != null && sprites[opp] != null) {
-            if (sprites[me].getKeyFrames().length > 0 && sprites[opp].getKeyFrames().length > 0) {
+            if (sprites[me].loaded() && sprites[opp].loaded()) {
                 STATUS_CURRENT = STATUS_RUNNING;
                 return;
             }
@@ -252,8 +254,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                         regions.add(spriteAtlas[me].findRegion(StringFormat(i)));
                     }
                 }
-                sprites[me] = new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP);
-                sprites[me].fitInRectangle(Rectangle.tmp, true);
+                sprites[me].setSprite(new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP));
             } else {
                 //if (female && checkForFemaleAsset(false, path)) path = path + "f";
                 //spriteAtlas[opp] = GdxGZipAssetLoader.loadTextureAtlas(path, false);
@@ -269,12 +270,11 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                         regions.add(spriteAtlas[opp].findRegion(StringFormat(i)));
                     }
                 }
-                sprites[opp] = new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP);
-                sprites[opp].fitInRectangle(Rectangle.tmp2, false);
+                sprites[opp].setSprite(new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP));
             }
             if (STATUS_CURRENT == STATUS_INIT) {
                 if (sprites[me] != null && sprites[opp] != null) {
-                    if (sprites[me].getKeyFrames().length > 0 && sprites[opp].getKeyFrames().length > 0) {
+                    if (sprites[me].loaded() && sprites[opp].loaded()) {
                         STATUS_CURRENT = STATUS_RUNNING;
                     }
                 }
@@ -284,7 +284,7 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
 
     private void drawPokemon(byte player) {
         if (sprites[player] != null) {
-            sprites[player].draw(elapsedTime, batch);
+            sprites[player].draw(batch, 1f);
         }
     }
 
