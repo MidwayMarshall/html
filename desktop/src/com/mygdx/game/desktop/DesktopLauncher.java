@@ -96,6 +96,11 @@ public class DesktopLauncher {
 			}
 		}
 
+        @Override
+        public boolean isDebug() {
+            return true;
+        }
+
 		@Override
 		public TextureAtlas getAtlas(String path) {
 			return new TextureAtlas(Gdx.files.internal(path));

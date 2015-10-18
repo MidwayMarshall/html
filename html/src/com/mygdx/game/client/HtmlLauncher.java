@@ -91,6 +91,11 @@ public class HtmlLauncher extends GwtApplication {
             unpausebattle();
         }
 
+        @Override
+        public native boolean isDebug() /*-{
+            return $wnd.battle.debug || false;
+        }-*/;
+
         private native void pausebattle() /*-{
             console.log("html pause");
             $wnd.battle.pause();
