@@ -6,9 +6,10 @@ import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
+import com.mygdx.game.battlewindow.InstantEvent;
 
 public class HtmlEvents {
-    public static class DelayedEvent implements Event, DownloaderListener {
+    public static class DelayedEvent extends Event implements DownloaderListener {
         /* If an asset doesn't exist the client need to download from the server and when finished fire the event that requires the resource */
         private Event event;
         private Bridge bridge;
@@ -22,8 +23,12 @@ public class HtmlEvents {
             this.type = type;
         }
 
+        public int duration() {
+            return -1;
+        }
+
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
             switch (type) {
                 case 0: {
                     break;
@@ -57,7 +62,8 @@ public class HtmlEvents {
             queueSize--;
             //Logger.println("Queue remaining " + queueSize + " type: " + type);
             if (queueSize == 0) {
-                bridge.addEvent(event);
+                bridge.addImmediateEvent(event);
+                finish();
             }
         }
 
@@ -89,33 +95,25 @@ public class HtmlEvents {
         }
     }
 
-    public static class AnimatedHPEvent implements Event {
-        private Bridge bridge;
+    public static class AnimatedHPEvent extends Event {
         private byte change;
-        private boolean side;
+        private int spot;
         private float duration;
 
-        public AnimatedHPEvent(byte change, boolean side, float duration, Bridge bridge) {
+        public AnimatedHPEvent(byte change, int spot, float duration) {
             this.change = change;
-            this.side = side;
+            this.spot = spot;
             this.duration = duration;
-            this.bridge = bridge;
+        }
+
+        public int duration() {
+            return (int) duration;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
             //bridge.pause();
-            Frame.HUDs[(side ? 0 : 1)].setChangeHP(change, duration/1000f);
-            new Timer() {
-                @Override
-                public void run() {
-                    finish();
-                }
-            }.schedule((int) (duration + 120));
-        }
-
-        private void finish() {
-            bridge.unpause();
+            Frame.getHUD(spot).setChangeHP(change, duration/1000f);
         }
     }
 }

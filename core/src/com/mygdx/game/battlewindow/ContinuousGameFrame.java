@@ -31,8 +31,8 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     public TextureAtlas[] spriteAtlas = new TextureAtlas[2];
     public BattleInfoHUD[] HUDs = new BattleInfoHUD[2];
 
-    private final byte me = 0;
-    private final byte opp = 1;
+    private byte me = 0;
+    private byte opp = 1;
 
     private final static int STATUS_INIT = 0;
     private final static int STATUS_RUNNING = 1;
@@ -49,6 +49,13 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
     private Bridge bridge;
 
     public ContinuousGameFrame(Bridge bridge) {
+        this.bridge = bridge;
+    }
+
+    public ContinuousGameFrame(Bridge bridge, boolean reversed) {
+        if (reversed) {
+            setPlayers((byte)1, (byte)0);
+        }
         this.bridge = bridge;
     }
 
@@ -73,6 +80,19 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
             Gdx.input.setInputProcessor(this);
             bridge.finished();
         }
+    }
+
+    public void setPlayers(byte me, byte opp) {
+        this.me = me;
+        this.opp = opp;
+    }
+
+    public  AnimatedActor getSprite(int spot) {
+        return sprites[spot];
+    }
+
+    public  BattleInfoHUD getHUD(int spot) {
+        return HUDs[spot];
     }
 
     protected void call() {
@@ -244,42 +264,25 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         return Gdx.files.internal("data/sheets/" + (!side ? "front/atlas/" : "back/atlas/") + path + "f" + ".zz").exists();
     }
 
-    public void updateSprite(boolean side, String path, boolean female) {
+    public void updateSprite(int spot, String path, boolean female) {
         //bridge.alert("Updating: " + path);
         if (!path.equals("0")) {
-            if (side) {
-                //if (female && checkForFemaleAsset(true, path)) path = path + "f";
-                //spriteAtlas[me] = GdxGZipAssetLoader.loadTextureAtlas(path, true);
-                spriteAtlas[me] = new TextureAtlas(Gdx.files.internal(path + ".atlas"));
-                //spriteAtlas[me] = bridge.getAtlas(path);
-                Array<TextureRegion> regions = new Array<TextureRegion>();
-                if (spriteAtlas[me].findRegion("001") == null) {
-                    for (int i = 1; i < spriteAtlas[me].getRegions().size; i++) {
-                        regions.add(spriteAtlas[me].findRegion("" + i));
-                    }
-                } else {
-                    for (int i = 1; i < spriteAtlas[me].getRegions().size; i++) {
-                        regions.add(spriteAtlas[me].findRegion(StringFormat(i)));
-                    }
+            //if (female && checkForFemaleAsset(true, path)) path = path + "f";
+            //spriteAtlas[me] = GdxGZipAssetLoader.loadTextureAtlas(path, true);
+            spriteAtlas[spot] = new TextureAtlas(Gdx.files.internal(path + ".atlas"));
+            //spriteAtlas[me] = bridge.getAtlas(path);
+            Array<TextureRegion> regions = new Array<TextureRegion>();
+            if (spriteAtlas[spot].findRegion("001") == null) {
+                for (int i = 1; i < spriteAtlas[spot].getRegions().size; i++) {
+                    regions.add(spriteAtlas[spot].findRegion("" + i));
                 }
-                sprites[me].setSprite(new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP));
             } else {
-                //if (female && checkForFemaleAsset(false, path)) path = path + "f";
-                //spriteAtlas[opp] = GdxGZipAssetLoader.loadTextureAtlas(path, false);
-                spriteAtlas[opp] = new TextureAtlas(Gdx.files.internal(path + ".atlas"));
-                //spriteAtlas[me] = bridge.getAtlas(path);
-                Array<TextureRegion> regions = new Array<TextureRegion>();
-                if (spriteAtlas[opp].findRegion("001") == null) {
-                    for (int i = 1; i < spriteAtlas[opp].getRegions().size; i++) {
-                        regions.add(spriteAtlas[opp].findRegion("" + i));
-                    }
-                } else {
-                    for (int i = 1; i < spriteAtlas[opp].getRegions().size; i++) {
-                        regions.add(spriteAtlas[opp].findRegion(StringFormat(i)));
-                    }
+                for (int i = 1; i < spriteAtlas[spot].getRegions().size; i++) {
+                    regions.add(spriteAtlas[spot].findRegion(StringFormat(i)));
                 }
-                sprites[opp].setSprite(new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP));
             }
+            sprites[spot].setSprite(new SpriteAnimation(0.075f, regions, Animation.PlayMode.LOOP));
+
             if (STATUS_CURRENT == STATUS_INIT) {
                 if (sprites[me] != null && sprites[opp] != null) {
                     if (sprites[me].loaded() && sprites[opp].loaded()) {

@@ -58,17 +58,17 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
     }
 
     private native byte getGender() /*-{
-        return this.gender;
+        return this.gender || 0;
     }-*/;
 
     private native byte getPercent() /*-{
-        return this.percent;
+        return this.percent || 0;
     }-*/;
     private native byte getLevel() /*-{
-        return this.level;
+        return this.level || 0;
     }-*/;
     private native String getName() /*-{
-        return this.name;
+        return this.name || "";
     }-*/;
 
     private native String pokemonName() /*-{
@@ -76,32 +76,33 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
     }-*/;
 
     private native short getNum() /*-{
-        return this.num;
+        return this.sprite ? (this.sprite & ( (1<< 16) -1)) : this.num;
     }-*/;
 
     private native boolean getShiny() /*-{
-        return this.shiny;
+        return this.shiny || false;
     }-*/;
 
     private native int getStatus() /*-{
-        return this.status;
+        return this.status || 0;
     }-*/;
 
     private native byte getforme() /*-{
-        return this.forme;
+        return this.sprite ? (this.sprite >> 16) : this.forme;
     }-*/;
 
     private native short getTotalLife() /*-{
-        return this.totalLife;
+        return this.totalLife || 0;
     }-*/;
 
     private native short getLife() /*-{
-        return this.life;
+        return this.life || 0;
     }-*/;
 
     public static native JavaScriptPokemon fromJS(String json) /*-{
         var ret = eval('(' + json + ')');
 
+        console.log("got evaled");
         //Change the name if it contains illegal characters. A regex would probably do the same job
         var name = ret.name;
         for (var i in name) {
@@ -116,6 +117,7 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
             ret.name = $wnd.pokeinfo.name(ret);
             break;
         }
+        console.log("got renamed");
 
         return ret;
     }-*/;
