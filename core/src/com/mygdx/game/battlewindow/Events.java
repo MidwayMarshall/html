@@ -1,7 +1,8 @@
 package com.mygdx.game.battlewindow;
 
+import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
-import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.actions.VisibleAction;
 import com.mygdx.game.JSONPoke;
 
@@ -64,34 +65,42 @@ public class Events {
     */
 
 
-    public static class SetHPBattlingAnimated implements Event {
+    public static class SetHPBattlingAnimated extends Event {
         byte percent;
         short HP;
         float duration;
+        int spot;
 
-        public SetHPBattlingAnimated(byte percent, short HP, float duration) {
+        public SetHPBattlingAnimated(int spot, byte percent, short HP, float duration) {
+            this.spot = spot;
             this.percent = percent;
             this.HP = HP;
             this.duration = duration;
         }
 
+        public int duration() {
+            return (int) (duration * 1000);
+        }
+
         @Override
-        public void run(ContinuousGameFrame Frame) {
-            Frame.HUDs[0].setHPBattling(percent, HP, duration);
+        public void launch(ContinuousGameFrame Frame) {
+            Frame.getHUD(spot).setHPBattling(percent, HP, duration);
             //          Log.e("Event", "SetHPBattlingAnimated " +  log + " to " + Thread.currentThread().getName() + " took: " + time);
         }
     }
 
-    public static class HUDChangeBattling implements Event {
+    public static class HUDChangeBattling extends InstantEvent {
         JSONPoke poke;
+        int spot;
 
-        public HUDChangeBattling(JSONPoke poke) {
+        public HUDChangeBattling(JSONPoke poke, int spot) {
             this.poke = poke;
+            this.spot = spot;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
-            Frame.HUDs[0].updatePokeNonSpectating(poke);
+        public void launch(ContinuousGameFrame Frame) {
+            Frame.getHUD(spot).updatePokeNonSpectating(poke);
             if (poke.status() == 31) {
                 //Frame.sprites[0].paused = true;
             }
@@ -99,19 +108,19 @@ public class Events {
         }
     }
 
-    public static class HUDChange implements Event {
+    public static class HUDChange extends InstantEvent {
         JSONPoke poke;
-        boolean side;
+        int spot;
 
 
-        public HUDChange(JSONPoke poke, boolean side) {
+        public HUDChange(JSONPoke poke, int spot) {
             this.poke = poke;
-            this.side = side;
+            this.spot = spot;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
-            Frame.HUDs[(side ? 0 : 1)].updatePoke(poke);
+        public void launch(ContinuousGameFrame Frame) {
+            Frame.getHUD(spot).updatePoke(poke);
             //if (poke.status() == 31) {
             //    Frame.sprites[(side ? 0 : 1)].paused = true;
             //}
@@ -119,24 +128,24 @@ public class Events {
         }
     }
 
-    public static class SpriteChange implements Event {
+    public static class SpriteChange extends InstantEvent {
         JSONPoke poke;
-        boolean side;
+        int spot;
         String path;
 
-        public SpriteChange(JSONPoke poke, boolean side) {
+        public SpriteChange(JSONPoke poke, int spot, boolean back) {
             this.poke = poke;
-            this.side = side;
-            this.path = (side ? "back/" : "front/") + Short.toString(poke.num());
+            this.spot = spot;
+            this.path = (back ? "back/" : "front/") + Short.toString(poke.num());
             if (poke.forme() > 0) {
                 this.path = this.path + "_" + Byte.toString(poke.forme());
             }
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
 //            Log.e("Event", "SpriteChange " + log + " to " + Thread.currentThread().getName() + " took: " + time);
-            Frame.updateSprite(side, path, false);
+            Frame.updateSprite(spot, path, false);
         }
 
         public String getPath() {
@@ -148,26 +157,26 @@ public class Events {
         }
     }
 
-    public static class StatusChange implements Event {
-        boolean side;
+    public static class StatusChange extends InstantEvent {
+        int spot;
         int status;
 
-        public StatusChange(boolean side, int status) {
-            this.side = side;
+        public StatusChange(int spot, int status) {
+            this.spot = spot;
             this.status = status;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
-            Frame.HUDs[(side ? 0 : 1)].updateStatus(status);
+            Frame.getHUD(spot).updateStatus(status);
             if (status == 31) {
                 //Frame.sprites[(side ? 0 : 1)].paused = true;
             }
         }
     }
 
-    public static class BackgroundChange implements Event {
+    public static class BackgroundChange extends InstantEvent {
         int id;
 
         public BackgroundChange(int id) {
@@ -175,7 +184,7 @@ public class Events {
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
             Frame.setBackground(id);
         }
 
@@ -184,52 +193,19 @@ public class Events {
         }
     }
 
-    /*
-    public static class SendOut implements Event {
-        JSONPoke poke;
-        boolean side;
-        String path;
+    public static class KO extends Event {
+        int spot;
 
-        public SendOut(JSONPoke poke, boolean side) {
-            this.poke = poke;
-            this.side = side;
-            this.path = (side ? "back/" : "front/") + Short.toString(poke.num());
+        public KO(int spot) {
+            this.spot = spot;
+        }
+
+        public int duration() {
+            return 800;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
-//            Log.e("Event", "SpriteChange " + log + " to " + Thread.currentThread().getName() + " took: " + time);
-            Frame.updateSprite(side, path, false);
-        }
-
-        public String getPath() {
-            return path;
-        }
-    }
-    */
-
-    public static class Hide implements Event {
-        boolean side;
-
-        public Hide(boolean side) {
-            this.side = side;
-        }
-
-        @Override
-        public void run(ContinuousGameFrame Frame) {
-            //Frame.sprites[(side ? 0 : 1)].visible = false;
-        }
-    }
-
-    public static class KO implements Event {
-        boolean side;
-
-        public KO(boolean side) {
-            this.side = side;
-        }
-
-        @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
             //Frame.sprites[(side ? 0 : 1)].paused = true;
             //Frame.sprites[(side ? 0 : 1)].startFade();
 
@@ -240,29 +216,62 @@ public class Events {
             VisibleAction visible  = new VisibleAction();
             visible.setVisible(false);
 
-            SequenceAction sequence = new SequenceAction();
-            sequence.addAction(fade);
-            sequence.addAction(visible);
-
-            Frame.sprites[(side ? 0 : 1)].pause();
-            Frame.sprites[(side ? 0 : 1)].addAction(sequence);
-            Frame.HUDs[(side ? 0 : 1)].updateStatus(31); // 31 = Koed
+            Frame.getSprite(spot).pause();
+            Frame.getSprite(spot).addAction(Actions.sequence(fade, visible));
+            Frame.getHUD(spot).updateStatus(31); // 31 = Koed
         }
     }
 
-    public static class SendBack implements Event {
-        boolean side;
+    public static class SendOut extends Event {
+        int spot;
 
-        public SendBack(boolean side) {
-            this.side = side;
+        public SendOut(int spot) {
+            this.spot = spot;
+        }
+
+        public int duration() {
+            return 600;
         }
 
         @Override
-        public void run(ContinuousGameFrame Frame) {
+        public void launch(ContinuousGameFrame Frame) {
+            ScaleToAction action = new ScaleToAction();
+            action.setScale(Frame.getSprite(spot).originalScale);
+            action.setInterpolation(Interpolation.pow2Out);
+            action.setDuration(0.4f);
+
+            FadeToAction fade = new FadeToAction();
+            fade.setDuration(.2f);
+            fade.setAlpha(1f);
+
+            VisibleAction visible  = new VisibleAction();
+            visible.setVisible(true);
+
+            PauseAction unpause = new PauseAction();
+            unpause.setPaused(false);
+
+            Frame.getSprite(spot).addAction(Actions.sequence(visible, fade, action, unpause));
+        }
+    }
+
+    public static class SendBack extends Event {
+        int spot;
+
+        public SendBack(int spot) {
+            this.spot = spot;
+        }
+
+        public int duration() {
+            return 600;
+        }
+
+        @Override
+        public void launch(ContinuousGameFrame Frame) {
             //Frame.sprites[(side ? 0 : 1)].paused = true;
             //Frame.sprites[(side ? 0 : 1)].startScale();
             ScaleToAction action = new ScaleToAction();
-            action.setScale(0.5f * Frame.sprites[(side ? 0 : 1)].getScaleX());
+            action.setScale(0.5f * Frame.getSprite(spot).originalScale);
+            action.setInterpolation(Interpolation.pow2In);
             action.setDuration(.4f);
 
             FadeToAction fade = new FadeToAction();
@@ -272,13 +281,8 @@ public class Events {
             VisibleAction visible  = new VisibleAction();
             visible.setVisible(false);
 
-            SequenceAction sequence = new SequenceAction();
-            sequence.addAction(action);
-            sequence.addAction(fade);
-            sequence.addAction(visible);
-
-            Frame.sprites[(side ? 0 : 1)].pause();
-            Frame.sprites[(side ? 0 : 1)].addAction(sequence);
+            Frame.getSprite(spot).pause();
+            Frame.getSprite(spot).addAction(Actions.sequence(action,fade,visible));
         }
     }
  }

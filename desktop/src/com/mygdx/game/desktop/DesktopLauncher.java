@@ -13,6 +13,7 @@ import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
 import com.mygdx.game.battlewindow.TaskService;
+import sun.security.krb5.internal.crypto.Des;
 
 import java.util.Random;
 
@@ -22,13 +23,27 @@ public class DesktopLauncher {
 		config.width = 600;
 		config.height = 360;
 		config.resizable = false;
-		new LwjglApplication(new ContinuousGameFrame(new DesktopBridge()), config);
+
+        DesktopBridge bridge = new DesktopBridge(true);
+
+		new LwjglApplication(new ContinuousGameFrame(bridge, bridge.me == 1), config);
 	}
 
 	private static class DesktopBridge implements Bridge {
 		public ContinuousGameFrame game;
+		public int me = 0;
+		public int opp = 1;
 
-		@Override
+        public DesktopBridge() {
+
+        }
+
+        public DesktopBridge(boolean reversed) {
+            me = 1;
+            opp = 0;
+        }
+
+        @Override
 		public void pause() {
 
 		}
@@ -59,11 +74,11 @@ public class DesktopLauncher {
 			Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
 			//mebattle = new Poke((byte) 100, "test", (short) 4, (byte)1,(byte) 100,(short) 0,(short) 100,(short) 100);
 			Poke opp = new Poke((byte) (random.nextInt(100) + 5), "Test", (short) 49, (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
-			service.offer(new Events.SpriteChange(me, true));
-			service.offer(new Events.SpriteChange(opp, false));
+			service.offer(new Events.SpriteChange(me, this.me, true));
+			service.offer(new Events.SpriteChange(opp, this.opp, false));
 			//service.offer(new Events.HUDChangeBattling(mebattle));
-			service.offer(new Events.HUDChange(me, true));
-			service.offer(new Events.HUDChange(opp, false));
+			service.offer(new Events.HUDChange(me, this.me));
+			service.offer(new Events.HUDChange(opp, this.opp));
 			return service;
 		}
 		Poke mebattle;
@@ -72,10 +87,10 @@ public class DesktopLauncher {
 		public void alert(String message) {
 			if (message == "true") {
 				//game.service.offer(new Events.KO(true));
-				game.service.offer(new Events.KO(true));
+				game.service.offer(new Events.SendOut(0));
 			} else if (message == "false") {
 				//game.service.offer(new Events.KO(false));
-				game.service.offer(new Events.SendBack(false));
+				game.service.offer(new Events.SendBack(0));
 			} else {
 				log(message);
 			}
@@ -100,6 +115,11 @@ public class DesktopLauncher {
 		public void addEvent(Event event) {
 
 		}
+
+        @Override
+        public void addImmediateEvent(Event event) {
+
+        }
 
 		@Override
 		public void log(String text) {

@@ -17,6 +17,8 @@ import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
 import com.mygdx.game.battlewindow.TaskService;
 
+import java.util.ArrayList;
+
 public class HtmlLauncher extends GwtApplication {
 
     public GwtApplicationConfiguration getConfig () {
@@ -28,13 +30,23 @@ public class HtmlLauncher extends GwtApplication {
 
     @Override
     public ApplicationListener getApplicationListener () {
-        return new ContinuousGameFrame(new HtmlBridge());
+        HtmlBridge bridge = new HtmlBridge();
+        return new ContinuousGameFrame(bridge, bridge.getMe() == 1);
     }
 
 
-    public static class HtmlBridge implements Bridge {
+    public static class HtmlBridge implements Bridge, Event.EventListener {
         byte me, opp;
         boolean isBattle;
+
+        public ArrayList<Event> eventQueue = new ArrayList<Event>();
+
+        public HtmlBridge() {
+            me = (byte) getMe();
+            opp = (byte) getOpp();
+
+            Logger.println("Created bridge with me " + (int)me + " and opp " + (int)opp);
+        }
 
         @Override
         public TextureAtlas getAtlas(String path) {
@@ -80,10 +92,12 @@ public class HtmlLauncher extends GwtApplication {
         }
 
         private native void pausebattle() /*-{
+            console.log("html pause");
             $wnd.battle.pause();
         }-*/;
 
         private native void unpausebattle() /*-{
+            console.log("html unpause");
             $wnd.battle.unpause();
         }-*/;
 
@@ -92,10 +106,10 @@ public class HtmlLauncher extends GwtApplication {
             //Window.alert("Alert from: " + side);
             if (message.equals("true")) {
                 //game.HUDs[0].updatePoke(JavaScriptPokemon.fromJS(getPoke(0, 1)));
-                Window.alert(getPoke(this.me, 0));
+                Window.alert(getPoke(this.me));
             } else if (message.equals("false")){
                 //game.HUDs[1].updatePoke(JavaScriptPokemon.fromJS(getPoke(1, 1)));
-                Window.alert(getPoke(this.opp, 0));
+                Window.alert(getPoke(this.opp));
                 //addEvent(new Events.LogEvent(getBattle()));
             } else {
                 //Window.alert(message);
@@ -104,48 +118,88 @@ public class HtmlLauncher extends GwtApplication {
 
         @Override
         public void finished() {
-            //Logger.println("finished");
+            Logger.println("finished");
             int randomNum = Random.nextInt(37);
             HtmlEvents.DelayedEvent event = new HtmlEvents.DelayedEvent(new Events.BackgroundChange(randomNum), this, 2);
             addEvent(event);
-            me = (byte) getMe();
-            opp = (byte) getOpp();
-            isBattle = getIsBattle();
-            //Logger.println("Is real? " + isBattle);
-            //Logger.println("My Pokemon " + getPoke(this.me, 0));
-            //Logger.println("Opp Pokemon " + getPoke(this.opp, 0));
 
-            JavaScriptPokemon me = JavaScriptPokemon.fromJS(getPoke(this.me, 0));
+            Logger.println("added event for background");
+            isBattle = getIsBattle();
+            Logger.println("Is battle? " + isBattle);
+            //Logger.println("My Pokemon " + getPoke(this.me));
+            //Logger.println("Opp Pokemon " + getPoke(this.opp));
+
+            String meStr = getPoke(this.me);
+            Logger.println("me str " + meStr);
+            JavaScriptPokemon me = JavaScriptPokemon.fromJS(meStr);
+            Logger.println("got poke " + me);
             if (isBattle) {
-                game.HUDs[0].updatePokeNonSpectating(me);
+                game.getHUD(this.me).updatePokeNonSpectating(me);
             } else {
-                game.HUDs[0].updatePoke(me);
+                game.getHUD(this.me).updatePoke(me);
             }
+            Logger.println("updated HUD");
             if (me.num() > 0) {
-                HtmlEvents.DelayedEvent eventme = new HtmlEvents.DelayedEvent(new Events.SpriteChange(me, true), this, 1);
+                Logger.println("Adding sprite change event");
+                HtmlEvents.DelayedEvent eventme = new HtmlEvents.DelayedEvent(new Events.SpriteChange(me, this.me, true), this, 1);
                 addEvent(eventme);
             }
 
-            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(this.opp, 0));
-            game.HUDs[1].updatePoke(opp);
+            Logger.println("getting opp");
+            JavaScriptPokemon opp = JavaScriptPokemon.fromJS(getPoke(this.opp));
+            Logger.println("got opp " + opp);
+            game.getHUD(this.opp).updatePoke(opp);
+            Logger.println("updated opp hud");
             if (opp.num() > 0) {
-                HtmlEvents.DelayedEvent eventopp = new HtmlEvents.DelayedEvent(new Events.SpriteChange(opp, false), this, 1);
+                Logger.println("Adding sprite change event");
+                HtmlEvents.DelayedEvent eventopp = new HtmlEvents.DelayedEvent(new Events.SpriteChange(opp, this.opp, false), this, 1);
                 addEvent(eventopp);
             }
 
-            Timer t = new Timer() {
-                @Override
-                public void run() {
-                    unpausebattle();
-                }
-            };
-
-            t.schedule(2000);
+            Logger.println("finished finished");
         }
 
         @Override
-        public void addEvent(Event event) {
-            game.service.offer(event);
+        synchronized public void addEvent(Event event) {
+            Logger.println("Adding event " + event.getClass().getName());
+            if (eventQueue.isEmpty()) {
+                pausebattle();
+            }
+            eventQueue.add(event);
+            event.listener = this;
+            if (eventQueue.size() == 1) {
+                Logger.println("offering event" + event.getClass().getName());
+                game.service.offer(event);
+            }
+        }
+
+        @Override
+        synchronized public void addImmediateEvent(Event event) {
+            Logger.println("Adding immediate event " + event.getClass().getName());
+            if (eventQueue.isEmpty()) {
+                pausebattle();
+                eventQueue.add(event);
+            } else {
+                //Don't add at spot 0 - it's the next event to be removed. The next one to be played is at spot 1
+                eventQueue.add(1, event);
+            }
+            event.listener = this;
+            if (eventQueue.size() == 1) {
+                Logger.println("offering event" + event.getClass().getName());
+                game.service.offer(event);
+            }
+        }
+
+        @Override
+        synchronized public void onEventFinished() {
+            Logger.println("Removing event " + eventQueue.get(0).getClass().getName());
+            eventQueue.remove(0);
+            if (eventQueue.size() > 0) {
+                Logger.println("offering next event" + eventQueue.get(0).getClass().getName());
+                game.service.offer(eventQueue.get(0));
+            } else {
+                unpausebattle();
+            }
         }
 
         /*
@@ -162,48 +216,45 @@ public class HtmlLauncher extends GwtApplication {
         }
         */
 
-        public void dealWithSendOut(int player) {
-            //Logger.println("sendout");
-            JavaScriptPokemon poke = JavaScriptPokemon.fromJS(getPoke(player, 0));
-            boolean side = player == me;
+        public void dealWithSendOut(int spot) {
+            Logger.println("html sendout");
+            JavaScriptPokemon poke = JavaScriptPokemon.fromJS(getPoke(spot));
+            boolean myself = player(spot) == me;
             Event event;
-            if (side) {
-                if (isBattle) {
-                    event = new Events.HUDChangeBattling(poke);
-                } else {
-                    event = new Events.HUDChange(poke, true);
-                }
+            if (myself && isBattle) {
+                event = new Events.HUDChangeBattling(poke, spot);
             } else {
-                event = new Events.HUDChange(poke, false);
+                event = new Events.HUDChange(poke, spot);
             }
             addEvent(event);
-            HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, side), this, 1);
+            HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, spot, myself), this, 1);
+            addEvent(event1);
+            addEvent(new Events.SendOut(spot));
+        }
+
+        public void dealWithSpriteChange(int spot) {
+            Logger.println("html spritechange");
+            JavaScriptPokemon poke = JavaScriptPokemon.fromJS(getPoke(spot));
+            boolean myself = player(spot) == me;
+
+            HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, spot, myself), this, 1);
             addEvent(event1);
         }
 
-        public void dealWithSendBack(int player) {
-            //Logger.println("sendback");
-            pausebattle();
-            Event event = new Events.SendBack(player == me);
-            addEvent(event);
-            Timer t = new Timer() {
-                @Override
-                public void run() {
-                    unpausebattle();
-                }
-            };
-            t.schedule(600);
-        }
-
-        public void dealWithStatusChange(int player, int status) {
-            //Logger.println("statuschange");
-            Event event = new Events.StatusChange(player == me, status);
+        public void dealWithSendBack(int spot) {
+            Logger.println("html sendback");
+            Event event = new Events.SendBack(spot);
             addEvent(event);
         }
 
-        public void dealWithHpChange(int player, int change) {
-            //Logger.println("hpchange");
-            pausebattle();
+        public void dealWithStatusChange(int spot, int status) {
+            Logger.println("html statuschange");
+            Event event = new Events.StatusChange(spot, status);
+            addEvent(event);
+        }
+
+        public void dealWithHpChange(int spot, int change) {
+            Logger.println("html hpchange");
 
             int duration = change;
             duration = Math.min(100, Math.abs(duration));
@@ -211,69 +262,68 @@ public class HtmlLauncher extends GwtApplication {
             /* Delay varying between 700ms and 1300 ms depending on how much hp */
             duration = 700 + duration*6;
 
-            boolean side = player == me;
+            boolean side = player(spot) == me;
             if (side && isBattle) {
-                dealWithHpChangeBattling(duration);
+                dealWithHpChangeBattling(spot, duration);
             } else {
-                Event event = new HtmlEvents.AnimatedHPEvent((byte) change, side, duration, this);
+                Event event = new HtmlEvents.AnimatedHPEvent((byte) change, spot, duration);
                 addEvent(event);
             }
         }
 
-        private void dealWithHpChangeBattling(int duration) {
-            JavaScriptPokemon my = JavaScriptPokemon.fromJS(getPoke(me, 0));
+        private void dealWithHpChangeBattling(int spot, int duration) {
+            JavaScriptPokemon my = JavaScriptPokemon.fromJS(getPoke(spot));
             Logger.println("new percent " + my.percent() + "  " + my.life());
-            Event event = new Events.SetHPBattlingAnimated(my.percent(), my.life(), duration/1000f);
+            Event event = new Events.SetHPBattlingAnimated(spot, my.percent(), my.life(), duration/1000f);
             addEvent(event);
-            new Timer() {
-                @Override
-                public void run() {
-                    unpausebattle();
-                }
-            }.schedule(duration + 120);
         }
 
-        public void dealWithKo(int player) {
-            //Logger.println("KO");
-            pausebattle();
-            Event event = new Events.KO(player == me);
+        public void dealWithKo(int spot) {
+            Logger.println("html KO");
+            Event event = new Events.KO(spot);
             addEvent(event);
-            Timer t = new Timer() {
-                @Override
-                public void run() {
-                    unpausebattle();
-                }
-            };
-            t.schedule(1000);
         }
 
         private native void setCallBacks() /*-{
+        console.log("setting callbacks");
         var that = this;
-        $wnd.battle.on("sendout", function(player) {
-            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSendOut(I)(player);
+        $wnd.battle.on("sendout", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSendOut(I)(spot);
         });
-        $wnd.battle.on("sendback", function(player) {
-            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSendBack(I)(player);
+        $wnd.battle.on("sendback", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSendBack(I)(spot);
         });
-        $wnd.battle.on("ko", function(player) {
-            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithKo(I)(player);
+        $wnd.battle.on("ko", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithKo(I)(spot);
         });
-        $wnd.battle.on("statuschange", function(player, status) {
-            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithStatusChange(II)(player, status);
+        $wnd.battle.on("statuschange", function(spot, status) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithStatusChange(II)(spot, status);
         });
-        $wnd.battle.on("hpchange", function(player, change) {
-            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithHpChange(II)(player, change);
+        $wnd.battle.on("hpchange", function(spot, change) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithHpChange(II)(spot, change);
         });
+        $wnd.battle.on("spritechange", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSpriteChange(I)(spot);
+        });
+        console.log("callbacks sets");
         }-*/;
 
         private static native int battleId() /*-{
         return $wnd.battleId;
         }-*/;
 
-        private static native String getPoke(int side, int slot) /*-{
-        var poke = $wnd.battle.teams[side][slot];
-        return JSON.stringify(poke);
+        private static native String getPoke(int spot) /*-{
+        var poke = $wnd.battle.pokes[spot];
+        return JSON.stringify(poke || {});
         }-*/;
+
+        private static int player(int spot){
+            return spot%2;
+        }
+
+        private static int slot(int spot){
+            return spot/2;
+        }
 
         private static native String getBattle() /*-{
             var battle = $wnd.battle;

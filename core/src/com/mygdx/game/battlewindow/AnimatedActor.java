@@ -98,6 +98,10 @@ public class AnimatedActor extends Actor {
         sprite.paused = true;
     }
 
+    public void pause(boolean paused) {
+        sprite.paused = paused;
+    }
+
     public boolean loaded() {
         return sprite != null;
     }
