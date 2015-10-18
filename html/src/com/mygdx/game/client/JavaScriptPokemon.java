@@ -71,6 +71,10 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
         return this.name;
     }-*/;
 
+    private native String pokemonName() /*-{
+        return $wnd.pokeinfo.name(this);
+    }-*/;
+
     private native short getNum() /*-{
         return this.num;
     }-*/;
@@ -96,7 +100,24 @@ public class JavaScriptPokemon extends JavaScriptObject implements JSONPoke {
     }-*/;
 
     public static native JavaScriptPokemon fromJS(String json) /*-{
-        return eval('(' + json + ')');
+        var ret = eval('(' + json + ')');
+
+        //Change the name if it contains illegal characters. A regex would probably do the same job
+        var name = ret.name;
+        for (var i in name) {
+            var chr = name.charCodeAt(i);
+            if (chr >= 32 && chr <= 126) {
+                continue;
+            }
+            if (chr == 3 || chr == 4 || chr == 15 || (chr >= 11 && chr <= 13)
+                    || chr == 166 || chr == 167 || chr == 173) {
+                continue;
+            }
+            ret.name = $wnd.pokeinfo.name(ret);
+            break;
+        }
+
+        return ret;
     }-*/;
 
     public static native String pokemonName(int num) /*-{
