@@ -61,6 +61,14 @@ task addSource << {
 tasks.compileGwt.dependsOn(addSource)
 tasks.draftCompileGwt.dependsOn(addSource)
 
+compileGwt {
+    style = 'OBF'
+}
+
+tasks.compileGwt {
+    style = 'OBF'
+}
+
 sourceCompatibility = 1.6
 sourceSets.main.java.srcDirs = [ "src/" ]
 
