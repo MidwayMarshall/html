@@ -149,7 +149,9 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
                 objectDebugger.end();
                 Gdx.gl20.glDisable(GL20.GL_BLEND);
                 */
-                renderDebugObjects();
+                if (bridge.isDebug()) {
+                    renderDebugObjects();
+                }
                 break;
             }
             case STATUS_PAUSED: {

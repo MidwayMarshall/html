@@ -20,4 +20,5 @@ public interface Bridge {
     /* Event will be played as soon as the current event finishes */
     public void addImmediateEvent(Event event);
     public void log(String text);
+    public boolean isDebug();
 }
