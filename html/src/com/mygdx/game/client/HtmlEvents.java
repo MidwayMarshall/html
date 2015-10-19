@@ -1,15 +1,13 @@
 package com.mygdx.game.client;
 
 
-import com.google.gwt.user.client.Timer;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
-import com.mygdx.game.battlewindow.InstantEvent;
 
 public class HtmlEvents {
-    public static class DelayedEvent extends Event implements DownloaderListener {
+    public static class DelayedEvent extends Event implements DownloaderListener, Event.EventListener {
         /* If an asset doesn't exist the client need to download from the server and when finished fire the event that requires the resource */
         private Event event;
         private Bridge bridge;
@@ -62,9 +60,14 @@ public class HtmlEvents {
             queueSize--;
             //Logger.println("Queue remaining " + queueSize + " type: " + type);
             if (queueSize == 0) {
-                bridge.addImmediateEvent(event);
-                finish();
+                event.listener = this;
+                bridge.processEvent(event);
             }
+        }
+
+        @Override
+        public void onEventFinished() {
+            finish();
         }
 
         @Override
@@ -113,7 +116,7 @@ public class HtmlEvents {
         @Override
         public void launch(ContinuousGameFrame Frame) {
             //bridge.pause();
-            Frame.getHUD(spot).setChangeHP(change, duration/1000f);
+            Frame.getHUD(spot).setChangeHP(change, duration / 1000f);
         }
     }
 }

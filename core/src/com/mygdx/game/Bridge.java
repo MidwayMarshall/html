@@ -17,8 +17,8 @@ public interface Bridge {
     public Texture getTexture(String path);
     public BitmapFont getFont(String path);
     public void addEvent(Event event);
-    /* Event will be played as soon as the current event finishes */
-    public void addImmediateEvent(Event event);
+    /* Event will be played immediately */
+    public void processEvent(Event event);
     public void log(String text);
     public boolean isDebug();
 }

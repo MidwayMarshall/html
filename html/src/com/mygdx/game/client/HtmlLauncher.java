@@ -177,25 +177,13 @@ public class HtmlLauncher extends GwtApplication {
             event.listener = this;
             if (eventQueue.size() == 1) {
                 Logger.println("offering event" + event.getClass().getName());
-                game.service.offer(event);
+                processEvent(event);
             }
         }
 
         @Override
-        synchronized public void addImmediateEvent(Event event) {
-            Logger.println("Adding immediate event " + event.getClass().getName());
-            if (eventQueue.isEmpty()) {
-                pausebattle();
-                eventQueue.add(event);
-            } else {
-                //Don't add at spot 0 - it's the next event to be removed. The next one to be played is at spot 1
-                eventQueue.add(1, event);
-            }
-            event.listener = this;
-            if (eventQueue.size() == 1) {
-                Logger.println("offering event" + event.getClass().getName());
-                game.service.offer(event);
-            }
+        synchronized public void processEvent(Event event) {
+            game.service.offer(event);
         }
 
         @Override

@@ -122,7 +122,7 @@ public class DesktopLauncher {
 		}
 
         @Override
-        public void addImmediateEvent(Event event) {
+        public void processEvent(Event event) {
 
         }
 
