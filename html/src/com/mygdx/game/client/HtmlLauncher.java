@@ -106,6 +106,10 @@ public class HtmlLauncher extends GwtApplication {
             $wnd.battle.unpause();
         }-*/;
 
+        private native int getBackgroundNum() /*-{
+            return $wnd.battle.data.background || 0;
+        }-*/;
+
         @Override
         public void alert(String message) {
             //Window.alert("Alert from: " + side);
@@ -124,8 +128,7 @@ public class HtmlLauncher extends GwtApplication {
         @Override
         public void finished() {
             Logger.println("finished");
-            int randomNum = Random.nextInt(37);
-            HtmlEvents.DelayedEvent event = new HtmlEvents.DelayedEvent(new Events.BackgroundChange(randomNum), this, 2);
+            HtmlEvents.DelayedEvent event = new HtmlEvents.DelayedEvent(new Events.BackgroundChange(getBackgroundNum()), this, 2);
             addEvent(event);
 
             Logger.println("added event for background");
