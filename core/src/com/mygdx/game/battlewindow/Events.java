@@ -285,4 +285,21 @@ public class Events {
             Frame.getSprite(spot).addAction(Actions.sequence(action,fade,visible));
         }
     }
+
+    public static class Visibility extends InstantEvent {
+        int spot;
+        boolean visible;
+
+        public Visibility(int spot, boolean visible) {
+            this.spot = spot;
+            this.visible = visible;
+        }
+        @Override
+        public void launch(ContinuousGameFrame frame) {
+            VisibleAction action = new VisibleAction();
+            action.setVisible(this.visible);
+
+            frame.getSprite(spot).addAction(action);
+        }
+    }
  }

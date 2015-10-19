@@ -292,6 +292,14 @@ public class HtmlLauncher extends GwtApplication {
             addEvent(event);
         }
 
+        public void dealWithVanish(int spot) {
+            addEvent(new Events.Visibility(spot, false));
+        }
+
+        public void dealWithReappear(int spot) {
+            addEvent(new Events.Visibility(spot, true));
+        }
+
         private native void setCallBacks() /*-{
         console.log("setting callbacks");
         var that = this;
@@ -312,6 +320,12 @@ public class HtmlLauncher extends GwtApplication {
         });
         $wnd.battle.on("spritechange", function(spot) {
             that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithSpriteChange(I)(spot);
+        });
+        $wnd.battle.on("vanish", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithVanish(I)(spot);
+        });
+        $wnd.battle.on("reappear", function(spot) {
+            that.@com.mygdx.game.client.HtmlLauncher.HtmlBridge::dealWithReappear(I)(spot);
         });
         console.log("callbacks sets");
         }-*/;
