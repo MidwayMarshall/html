@@ -262,9 +262,10 @@ public class ContinuousGameFrame extends ApplicationAdapter implements InputProc
         }
     }
 
+    /*
     private boolean checkForFemaleAsset(boolean side, String path) {
         return Gdx.files.internal("data/sheets/" + (!side ? "front/atlas/" : "back/atlas/") + path + "f" + ".zz").exists();
-    }
+    }*/
 
     public void updateSprite(int spot, String path, boolean female) {
         //bridge.alert("Updating: " + path);

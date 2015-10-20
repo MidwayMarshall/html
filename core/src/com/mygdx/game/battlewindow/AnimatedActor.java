@@ -1,5 +1,6 @@
 package com.mygdx.game.battlewindow;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Rectangle;
@@ -24,15 +25,14 @@ public class AnimatedActor extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         if (isVisible()) {
+            batchColor = batch.getColor();
+            batch.setColor(getColor());
             if (hasActions()) {
-                batchColor = batch.getColor();
-                batch.setColor(getColor());
                 batch.draw(sprite.getRegion(),
                         getX() + sprite.offX(originalScale) + (sprite.scaledWidth(originalScale - getScaleX()) / 2f),
                         getY() + sprite.offY(originalScale),
                         sprite.scaledWidth(getScaleX()),
                         sprite.scaledHeight(getScaleY()));
-                batch.setColor(batchColor);
             } else {
                 batch.draw(sprite.getRegion(),
                         getX() + sprite.offX(getScaleX()),
@@ -40,6 +40,7 @@ public class AnimatedActor extends Actor {
                         sprite.scaledWidth(getScaleX()),
                         sprite.scaledHeight(getScaleY()));
             }
+            batch.setColor(batchColor);
         }
     }
 
@@ -96,6 +97,10 @@ public class AnimatedActor extends Actor {
 
     public void pause() {
         sprite.paused = true;
+    }
+
+    public void unpause() {
+        sprite.paused = false;
     }
 
     public void pause(boolean paused) {

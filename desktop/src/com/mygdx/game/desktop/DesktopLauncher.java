@@ -64,11 +64,11 @@ public class DesktopLauncher {
 			effect.setPosition(Gdx.graphics.getWidth()/2 + 100, Gdx.graphics.getHeight());
 		}
 
+		Random random = new Random();
 		@Override
 		public TaskService setGame(ContinuousGameFrame game) {
 			this.game = game;
 			TaskService service = new DesktopService();
-			Random random = new Random();
 			int randomNum = random.nextInt(37);
 			service.offer(new Events.BackgroundChange(randomNum));
 			Poke me = new Poke((byte) (random.nextInt(95) + 5), "Test", (short) random.nextInt(600), (byte) random.nextInt(3), (byte) (random.nextInt(80) + 20), random.nextInt(7));
@@ -85,15 +85,17 @@ public class DesktopLauncher {
 
 		@Override
 		public void alert(String message) {
+			int status = random.nextInt(7);
 			if (message == "true") {
 				//game.service.offer(new Events.KO(true));
-				game.service.offer(new Events.SendOut(0));
+				game.service.offer(new Events.StatusChange(1, status));
 			} else if (message == "false") {
 				//game.service.offer(new Events.KO(false));
-				game.service.offer(new Events.SendBack(0));
+				game.service.offer(new Events.StatusChange(0, status));
 			} else {
 				log(message);
 			}
+			log(status + "");
 		}
 
         @Override

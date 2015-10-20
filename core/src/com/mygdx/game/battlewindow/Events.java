@@ -1,5 +1,6 @@
 package com.mygdx.game.battlewindow;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.actions.ScaleToAction;
@@ -121,7 +122,7 @@ public class Events {
         @Override
         public void launch(ContinuousGameFrame Frame) {
             Frame.getHUD(spot).updatePoke(poke);
-            //if (poke.status() == 31) {
+            //if (poke.statusColor() == 31) {
             //    Frame.sprites[(side ? 0 : 1)].paused = true;
             //}
             //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
@@ -146,6 +147,7 @@ public class Events {
         public void launch(ContinuousGameFrame Frame) {
 //            Log.e("Event", "SpriteChange " + log + " to " + Thread.currentThread().getName() + " took: " + time);
             Frame.updateSprite(spot, path, false);
+            handleStatus(spot, poke.status(), Frame);
         }
 
         public String getPath() {
@@ -154,6 +156,16 @@ public class Events {
 
         public void setPath(String path) {
             this.path = path;
+        }
+    }
+
+    private static void handleStatus(int spot, int status, ContinuousGameFrame Frame) {
+        if (status >= 0 && status <= 6) {
+            Frame.sprites[spot].setColor(new Color(Static.statusColor[status]));
+            Frame.sprites[spot].pause(Static.statusPause[status]);
+            Frame.sprites[spot].sprite.setFrameDuration(Static.statusFrameRate[status]);
+        } else if (status == 31) {
+            Frame.sprites[spot].pause();
         }
     }
 
@@ -168,11 +180,8 @@ public class Events {
 
         @Override
         public void launch(ContinuousGameFrame Frame) {
-            //Log.e("Event", log + " to " + Thread.currentThread().getName() + " took: " + time);
             Frame.getHUD(spot).updateStatus(status);
-            if (status == 31) {
-                //Frame.sprites[(side ? 0 : 1)].paused = true;
-            }
+            handleStatus(spot, status, Frame);
         }
     }
 
