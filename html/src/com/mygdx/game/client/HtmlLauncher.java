@@ -8,16 +8,12 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.user.client.Random;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
 import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
 import com.mygdx.game.battlewindow.TaskService;
-
-import java.util.ArrayList;
 
 public class HtmlLauncher extends GwtApplication {
 
@@ -35,11 +31,9 @@ public class HtmlLauncher extends GwtApplication {
     }
 
 
-    public static class HtmlBridge implements Bridge, Event.EventListener {
+    public static class HtmlBridge extends Bridge {
         byte me, opp;
         boolean isBattle;
-
-        public ArrayList<Event> eventQueue = new ArrayList<Event>();
 
         public HtmlBridge() {
             me = (byte) getMe();
@@ -62,8 +56,6 @@ public class HtmlLauncher extends GwtApplication {
         public BitmapFont getFont(String path) {
             return Assets.getFont(path);
         }
-
-        private ContinuousGameFrame game;
 
         @Override
         public TaskService setGame(ContinuousGameFrame game) {
@@ -165,37 +157,6 @@ public class HtmlLauncher extends GwtApplication {
             }
 
             Logger.println("finished finished");
-        }
-
-        @Override
-        synchronized public void addEvent(Event event) {
-            Logger.println("Adding event " + event.getClass().getName());
-            if (eventQueue.isEmpty()) {
-                pausebattle();
-            }
-            eventQueue.add(event);
-            event.listener = this;
-            if (eventQueue.size() == 1) {
-                Logger.println("offering event" + event.getClass().getName());
-                processEvent(event);
-            }
-        }
-
-        @Override
-        synchronized public void processEvent(Event event) {
-            game.service.offer(event);
-        }
-
-        @Override
-        synchronized public void onEventFinished() {
-            Logger.println("Removing event " + eventQueue.get(0).getClass().getName());
-            eventQueue.remove(0);
-            if (eventQueue.size() > 0) {
-                Logger.println("offering next event" + eventQueue.get(0).getClass().getName());
-                game.service.offer(eventQueue.get(0));
-            } else {
-                unpausebattle();
-            }
         }
 
         /*

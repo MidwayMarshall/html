@@ -10,10 +10,8 @@ import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.mygdx.game.Bridge;
 import com.mygdx.game.battlewindow.ContinuousGameFrame;
-import com.mygdx.game.battlewindow.Event;
 import com.mygdx.game.battlewindow.Events;
 import com.mygdx.game.battlewindow.TaskService;
-import sun.security.krb5.internal.crypto.Des;
 
 import java.util.Random;
 
@@ -29,8 +27,7 @@ public class DesktopLauncher {
 		new LwjglApplication(new ContinuousGameFrame(bridge, bridge.me == 1), config);
 	}
 
-	private static class DesktopBridge implements Bridge {
-		public ContinuousGameFrame game;
+	private static class DesktopBridge extends Bridge {
 		public int me = 0;
 		public int opp = 1;
 
@@ -117,16 +114,6 @@ public class DesktopLauncher {
 		public BitmapFont getFont(String path) {
 			return null;
 		}
-
-		@Override
-		public void addEvent(Event event) {
-
-		}
-
-        @Override
-        public void processEvent(Event event) {
-
-        }
 
 		@Override
 		public void log(String text) {
