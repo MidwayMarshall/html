@@ -186,7 +186,7 @@ public class HtmlLauncher extends GwtApplication {
             addEvent(event);
             HtmlEvents.DelayedEvent event1 = new HtmlEvents.DelayedEvent(new Events.SpriteChange(poke, spot, myself), this, 1);
             addEvent(event1);
-            addEvent(new Events.SendOut(spot));
+            addEvent(new Events.SendOut(spot, poke));
         }
 
         public void dealWithSpriteChange(int spot) {

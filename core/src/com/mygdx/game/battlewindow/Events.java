@@ -233,8 +233,10 @@ public class Events {
 
     public static class SendOut extends Event {
         int spot;
+        JSONPoke poke;
 
-        public SendOut(int spot) {
+        public SendOut(int spot, JSONPoke poke) {
+            this.poke = poke;
             this.spot = spot;
         }
 
@@ -244,6 +246,8 @@ public class Events {
 
         @Override
         public void launch(ContinuousGameFrame Frame) {
+            handleStatus(spot, poke.status(), Frame);
+
             ScaleToAction action = new ScaleToAction();
             action.setScale(Frame.getSprite(spot).originalScale);
             action.setInterpolation(Interpolation.pow2Out);
@@ -256,10 +260,7 @@ public class Events {
             VisibleAction visible  = new VisibleAction();
             visible.setVisible(true);
 
-            PauseAction unpause = new PauseAction();
-            unpause.setPaused(false);
-
-            Frame.getSprite(spot).addAction(Actions.sequence(visible, fade, action, unpause));
+            Frame.getSprite(spot).addAction(Actions.sequence(visible, fade, action));
         }
     }
 

@@ -95,6 +95,10 @@ public class AnimatedActor extends Actor {
         originalScale = scale;
     }
 
+    public boolean paused() {
+        return sprite.paused;
+    }
+
     public void pause() {
         sprite.paused = true;
     }
